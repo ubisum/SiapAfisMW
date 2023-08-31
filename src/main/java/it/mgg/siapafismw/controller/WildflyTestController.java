@@ -22,7 +22,6 @@ public class WildflyTestController
 	{
 		/* creazione di oggetto fittizio */
 		DetenutoDTO detenuto = new DetenutoDTO("Pietro", "Gambadilegno", "AR5695K", "Topolinia", "C");
-		
 		/* preparazione risposta */
 		return ResponseEntity.ok(new ListaDetenutiDTO(List.of(detenuto)));
 	}
