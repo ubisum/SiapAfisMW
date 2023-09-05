@@ -3,12 +3,15 @@ package it.mgg.siapafismw.service;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import it.mgg.siapafismw.dto.UtenteDTO;
 import it.mgg.siapafismw.model.Utente;
 import it.mgg.siapafismw.repositories.UtenteRepository;
 
@@ -17,6 +20,9 @@ public class UserDetailsServiceImpl implements UserDetailsService
 {
 	@Autowired
 	private UtenteRepository utenteRepository;
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException 
@@ -31,7 +37,10 @@ public class UserDetailsServiceImpl implements UserDetailsService
 			throw new UsernameNotFoundException("Nessun utente trovato con lo username " + username);
 		
 		/* riempimento oggetto di risposta */
-		return null;
+		ModelMapper mapper = new ModelMapper();
+		UtenteDTO dto = mapper.map(optUtente.get(), UtenteDTO.class);
+		
+		return dto;
 	}
 
 }
