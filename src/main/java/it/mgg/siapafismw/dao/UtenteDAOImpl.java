@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import it.mgg.siapafismw.dto.UtenteDTO;
 import it.mgg.siapafismw.model.Utente;
@@ -14,6 +15,9 @@ public class UtenteDAOImpl implements UtenteDAO
 {
 	@Autowired
 	private UtenteRepository utenteRepository;
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Override
 	public Utente insertUtente(UtenteDTO nuovoUtente) 
@@ -41,6 +45,7 @@ public class UtenteDAOImpl implements UtenteDAO
 		
 		ModelMapper mapper = new ModelMapper();
 		Utente utenteDaSalvare =  mapper.map(nuovoUtente, Utente.class);
+		utenteDaSalvare.setPassword(bCryptPasswordEncoder.encode(nuovoUtente.getPassword()));
 		
 		return utenteRepository.save(utenteDaSalvare);
 	}
