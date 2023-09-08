@@ -1,5 +1,6 @@
 package it.mgg.siapafismw.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,13 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		
 		else
 			return detenuto.get();
+	}
+
+	@Override
+	public List<Detenuto> getAllDetenuti() 
+	{
+		/* ricerca di tutti i detenuti presenti sul database */
+		return detenutoRepository.findAll();
 	}
 
 }

@@ -1,5 +1,9 @@
 package it.mgg.siapafismw.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,25 @@ public class DetenutoServiceImpl implements DetenutoService
 		}
 		
 		return detenutoDTO;
+	}
+
+	@Override
+	public List<DetenutoDTO> getAllDetenuti() 
+	{
+		/* creazione lista di output */
+		List<DetenutoDTO> listaOutput = new ArrayList<>();
+		
+		/* ricerca dei detenuti sul DB */
+		List<Detenuto> listaDB = detenutoDAO.getAllDetenuti();
+		
+		if(CollectionUtils.isNotEmpty(listaDB))
+		{
+			ModelMapper mapper = new ModelMapper();
+			for(Detenuto detenuto : listaDB)
+				listaOutput.add(mapper.map(detenuto, DetenutoDTO.class));
+		}
+		
+		return listaOutput;
 	}
 
 }
