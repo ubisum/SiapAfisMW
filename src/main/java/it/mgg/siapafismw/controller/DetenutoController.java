@@ -1,5 +1,7 @@
 package it.mgg.siapafismw.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,4 +34,20 @@ public class DetenutoController
 			return ResponseEntity.notFound().build();
 	}
 	
+	@GetMapping("/GetListaDetenuti/{numeroTelefono}")
+	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@PathVariable("numeroTelefono") String numeroTelefono)
+	{
+		try
+		{
+			/* ricerca dei detenuti */
+			List<DetenutoDTO> listaDetenuti = this.detenutoService.getDetenutiByNumeroTelefono(numeroTelefono);
+			
+			return ResponseEntity.ok(listaDetenuti);
+		}
+		
+		catch(Throwable ex)
+		{
+			return ResponseEntity.internalServerError().body(null);
+		}
+	}
 }

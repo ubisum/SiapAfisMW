@@ -55,4 +55,24 @@ public class DetenutoServiceImpl implements DetenutoService
 		return listaOutput;
 	}
 
+	@Override
+	public List<DetenutoDTO> getDetenutiByNumeroTelefono(String numeroTelefono) 
+	{
+		/* ricerca dei detenuti */
+		List<Detenuto> listaDetenuti = this.detenutoDAO.getDetenutiByNumeroTelefono(numeroTelefono);
+		
+		/* mapping */
+		List<DetenutoDTO> listaOutput = new ArrayList<>();
+		if(CollectionUtils.isNotEmpty(listaDetenuti))
+		{
+			ModelMapper mapper = new ModelMapper();
+			for(Detenuto detenuto : listaDetenuti)
+			{
+				listaOutput.add(mapper.map(detenuto, DetenutoDTO.class));
+			}
+		}
+		
+		return listaOutput;
+	}
+
 }

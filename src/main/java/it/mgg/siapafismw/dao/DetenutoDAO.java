@@ -8,4 +8,5 @@ public interface DetenutoDAO
 {
 	public Detenuto findDetenutoByMatricola(String matricola);
 	public List<Detenuto> getAllDetenuti();
+	public List<Detenuto> getDetenutiByNumeroTelefono(String numeroTelefono);
 }

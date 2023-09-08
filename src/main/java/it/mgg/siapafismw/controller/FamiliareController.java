@@ -26,7 +26,6 @@ public class FamiliareController
 	
 	@PostMapping("/SalvaFamiliare")
 	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare)
-//	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareDTO familiare)
 	{
 		EsitoDTO esito = new EsitoDTO();
 		HttpStatus status = null;
@@ -34,7 +33,6 @@ public class FamiliareController
 		try
 		{
 			familiareService.insertFamiliare(familiare.getFamiliareModel());
-//			familiareService.insertFamiliare(familiare);
 			esito.setResponseCode("200");
 			esito.setResponseDescription("Familiare aggiunto con successo");
 			status = HttpStatus.OK;

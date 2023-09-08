@@ -8,4 +8,5 @@ public interface DetenutoService
 {
 	public DetenutoDTO findDetenutoByMatricola(String matricola);
 	public List<DetenutoDTO> getAllDetenuti();
+	public List<DetenutoDTO> getDetenutiByNumeroTelefono(String numeroTelefono);
 }
