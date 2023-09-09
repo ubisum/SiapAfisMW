@@ -48,7 +48,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new IllegalArgumentException("Numero documento del familiare non valido");
 		
 		if(StringUtils.isBlank(familiare.getTelefono()) || !familiare.getTelefono().matches("^[0-9]+$"))
-			throw new IllegalArgumentException("Nome del familiare non valido");
+			throw new IllegalArgumentException("Telefono del familiare non valido");
 		
 		/* controllo presenza familiare con stesso numero di telefono */
 		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
@@ -86,6 +86,21 @@ public class FamiliareDAOImpl implements FamiliareDAO
 				allegatoRepository.save(allegatoDaSalvare);
 			}
 		}
+	}
+
+	@Override
+	public Familiare getFamiliareByNumeroTelefono(String numeroTelefono) 
+	{
+		/* controllo numero telefono */
+		if(StringUtils.isBlank(numeroTelefono))
+			throw new IllegalArgumentException("Telefono del familiare non valido");
+		
+		/* ricerca familiare */
+		Optional<Familiare> optFamiliare = this.familiareRepository.findById(numeroTelefono);
+		if(optFamiliare.isEmpty())
+			throw new IllegalArgumentException("Nessun familiare con il teelefono fornito");
+		
+		return optFamiliare.get();
 	}
 
 }

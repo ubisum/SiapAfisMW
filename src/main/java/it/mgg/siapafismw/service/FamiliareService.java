@@ -5,4 +5,5 @@ import it.mgg.siapafismw.dto.FamiliareDTO;
 public interface FamiliareService 
 {
 	public void insertFamiliare(FamiliareDTO familiare);
+	public FamiliareModelDTO getFamiliareByNumeroTelefono(String numeroTelefono);
 }

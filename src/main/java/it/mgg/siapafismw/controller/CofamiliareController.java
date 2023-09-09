@@ -5,38 +5,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.mgg.siapafismw.dto.CofamiliareDTO;
 import it.mgg.siapafismw.dto.EsitoDTO;
-import it.mgg.siapafismw.service.FamiliareModelDTO;
-import it.mgg.siapafismw.service.FamiliareService;
+import it.mgg.siapafismw.service.CofamiliareService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/familiare")
-public class FamiliareController 
+@RequestMapping("/cofamiliare")
+public class CofamiliareController 
 {
 	@Autowired
-	private FamiliareService familiareService;
+	private CofamiliareService cofamiliareService;
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
-	@PostMapping("/SalvaFamiliare")
-	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare)
+	@PostMapping("/SalvaCoFamiliare")
+	private ResponseEntity<EsitoDTO> salvaCoFamiliare(@RequestBody CofamiliareDTO cofamiliare)
 	{
 		EsitoDTO esito = new EsitoDTO();
 		HttpStatus status = null;
 		
 		try
 		{
-			familiareService.insertFamiliare(familiare.getFamiliareModel());
+			cofamiliareService.insertCofamiliare(cofamiliare);
 			esito.setResponseCode("200");
-			esito.setResponseDescription("Familiare aggiunto con successo");
+			esito.setResponseDescription("Cofamiliare aggiunto con successo");
+			
 			status = HttpStatus.OK;
 		}
 		
@@ -44,25 +43,10 @@ public class FamiliareController
 		{
 			esito.setResponseCode("500");
 			esito.setResponseDescription(StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : INTERNAL_SERVER_ERROR);
+			
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		
-		
-		return ResponseEntity.status(status.value()).body(esito);
-	
-	}
-	
-	@GetMapping("/GetFamiliare/{numeroTelefono}")
-	public ResponseEntity<FamiliareModelDTO> getFamiliare(@PathVariable String numeroTelefono)
-	{
-		try
-		{
-			return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefono(numeroTelefono));
-		}
-		
-		catch(Throwable ex)
-		{
-			return ResponseEntity.internalServerError().body(null);
-		}	
+		return ResponseEntity.status(status).body(esito);
 	}
 }
