@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import it.mgg.siapafismw.dto.CofamiliareDTO;
 import it.mgg.siapafismw.dto.EsitoDTO;
@@ -48,5 +51,23 @@ public class CofamiliareController
 		}
 		
 		return ResponseEntity.status(status).body(esito);
+	}
+	
+	@GetMapping("/GetCofamiliare/{codiceFiscale}")
+	private ResponseEntity<CofamiliareDTO> GetCofamiliare(@PathVariable String codiceFiscale)
+	{
+		
+		try
+		{
+			return ResponseEntity.ok().body(this.cofamiliareService.findCofamiliareByCodiceFiscale(codiceFiscale));
+			
+		}
+		
+		catch(Throwable ex)
+		{
+			return ResponseEntity.internalServerError().body(null);
+		}
+		
+		
 	}
 }

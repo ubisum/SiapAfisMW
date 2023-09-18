@@ -1,10 +1,12 @@
 package it.mgg.siapafismw.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.mgg.siapafismw.dao.CofamiliareDAO;
 import it.mgg.siapafismw.dto.CofamiliareDTO;
+import it.mgg.siapafismw.model.Cofamiliare;
 
 @Service
 public class CofamiliareServiceImpl implements CofamiliareService 
@@ -17,6 +19,15 @@ public class CofamiliareServiceImpl implements CofamiliareService
 	{
 		cofamiliareDAO.insertCofamiliare(cofamiliare);
 
+	}
+
+	@Override
+	public CofamiliareDTO findCofamiliareByCodiceFiscale(String codiceFiscale) 
+	{
+		Cofamiliare input = this.cofamiliareDAO.findCofamiliareByCodiceFiscale(codiceFiscale);
+		ModelMapper mapper = new ModelMapper();
+		
+		return mapper.map(input, CofamiliareDTO.class);
 	}
 
 }

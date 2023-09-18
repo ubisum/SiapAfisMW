@@ -50,4 +50,17 @@ public class CofamiliareDAOImpl implements CofamiliareDAO
 
 	}
 
+	@Override
+	public Cofamiliare findCofamiliareByCodiceFiscale(String codiceFiscale) 
+	{
+		if(StringUtils.isBlank(codiceFiscale))
+			throw new IllegalArgumentException("Codice fiscale cofamiliare non valido");
+		
+		Optional<Cofamiliare> optCofamiliare = cofamiliareRepository.findById(codiceFiscale);
+		if(optCofamiliare.isEmpty())
+			throw new IllegalArgumentException("Nessun cofamiliare presente con il codice fiscale fornito");
+		
+		return optCofamiliare.get();
+	}
+
 }
