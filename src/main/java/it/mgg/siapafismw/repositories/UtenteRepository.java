@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.mgg.siapafismw.model.Utente;
 
-public interface UtenteRepository extends JpaRepository<Utente, String> {
-
+public interface UtenteRepository extends JpaRepository<Utente, String> 
+{
+	public Utente findByUsername(String username);
 }
