@@ -9,10 +9,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import it.mgg.siapafismw.dao.DetenutoDAO;
 import it.mgg.siapafismw.dto.AvailabilityDTO;
 import it.mgg.siapafismw.dto.DetenutoDTO;
+import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.model.Detenuto;
 
@@ -106,6 +108,27 @@ public class DetenutoServiceImpl implements DetenutoService
 		
 		return slot;
 			
+	}
+
+	@Override
+	public List<DetenutoDTO> findDetenutiByCFNumeroTelefono(@RequestBody RicercaDTO ricerca) 
+	{
+		/* ricerca detenuti nel DAO */
+		List<Detenuto> listaDetenuti = detenutoDAO.findDetenutiByCFNumeroTelefono(ricerca);
+		
+		/* lista output */
+		List<DetenutoDTO> listaDTO = new ArrayList<>();
+		
+		if(CollectionUtils.isNotEmpty(listaDetenuti))
+		{
+			ModelMapper mapper = new ModelMapper();
+			
+			for(Detenuto detenuto : listaDetenuti)
+				listaDTO.add(mapper.map(detenuto, DetenutoDTO.class));
+			
+		}
+		
+		return listaDTO;
 	}
 
 }

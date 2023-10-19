@@ -42,6 +42,7 @@ public class FamiliareController
 		
 		catch(Throwable ex)
 		{
+			ex.printStackTrace();
 			esito.setResponseCode("500");
 			esito.setResponseDescription(StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : INTERNAL_SERVER_ERROR);
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -62,6 +63,7 @@ public class FamiliareController
 		
 		catch(Throwable ex)
 		{
+			ex.printStackTrace();
 			return ResponseEntity.internalServerError().body(null);
 		}	
 	}

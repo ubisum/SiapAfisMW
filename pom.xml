@@ -117,6 +117,12 @@
 					<scope>test</scope>
 				</dependency>
 
+				<dependency>
+					<groupId>com.ibm.db2</groupId>
+					<artifactId>jcc</artifactId>
+					<version>11.5.8.0</version>
+				</dependency>
+
 
 			</dependencies>
 		</profile>
@@ -233,7 +239,7 @@
 					<artifactId>springfox-swagger-ui</artifactId>
 					<version>3.0.0</version>
 				</dependency>
-				
+
 				<dependency>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-security</artifactId>
@@ -258,6 +264,12 @@
 					<groupId>org.springframework.security</groupId>
 					<artifactId>spring-security-test</artifactId>
 					<scope>test</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>com.ibm.db2</groupId>
+					<artifactId>jcc</artifactId>
+					<version>11.5.8.0</version>
 				</dependency>
 
 

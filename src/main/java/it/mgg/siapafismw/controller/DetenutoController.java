@@ -9,10 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.mgg.siapafismw.dto.DetenutoDTO;
+import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.service.DetenutoService;
 
@@ -39,19 +42,20 @@ public class DetenutoController
 			return ResponseEntity.notFound().build();
 	}
 	
-	@GetMapping("/GetListaDetenuti/{numeroTelefono}")
-	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@PathVariable("numeroTelefono") String numeroTelefono)
+	@PostMapping("/GetListaDetenuti")
+	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody RicercaDTO ricerca)
 	{
 		try
 		{
 			/* ricerca dei detenuti */
-			List<DetenutoDTO> listaDetenuti = this.detenutoService.getDetenutiByNumeroTelefono(numeroTelefono);
+			List<DetenutoDTO> listaDetenuti = this.detenutoService.findDetenutiByCFNumeroTelefono(ricerca);
 			
 			return ResponseEntity.ok(listaDetenuti);
 		}
 		
 		catch(Throwable ex)
 		{
+			ex.printStackTrace();
 			return ResponseEntity.internalServerError().body(null);
 		}
 	}
@@ -73,6 +77,8 @@ public class DetenutoController
 		
 		catch(Throwable ex)
 		{
+			ex.printStackTrace();
+			
 			slot = new SlotDisponibileDTO();
 			slot.setResponseCode("500");
 			slot.setRespondeDescription(StringUtils.isNotBlank(ex.getMessage()) ? 

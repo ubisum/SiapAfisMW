@@ -61,10 +61,10 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		Familiare familiareSalvato = familiareRepository.save(toDB);
 		
 		/* controllo allegati */
-		if(CollectionUtils.isNotEmpty(familiare.getAllegati()))
+		if(CollectionUtils.isNotEmpty(familiare.getListaAllegati()))
 		{
 			List<String> listaNomi = new ArrayList<>();
-			for(AllegatoDTO allegato : familiare.getAllegati())
+			for(AllegatoDTO allegato : familiare.getListaAllegati())
 			{
 				if(StringUtils.isNotBlank(allegato.getNomeFile()))
 					listaNomi.add(allegato.getNomeFile());
@@ -78,7 +78,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 				throw new IllegalArgumentException("Uno o piu' allegati risultano registrati coi nomi forniti");
 			
 			/* aggiunta allegati */
-			for(AllegatoDTO allegato : familiare.getAllegati())
+			for(AllegatoDTO allegato : familiare.getListaAllegati())
 			{
 				Allegato allegatoDaSalvare = mapper.map(allegato, Allegato.class);
 				allegatoDaSalvare.setFamiliare(familiareSalvato);

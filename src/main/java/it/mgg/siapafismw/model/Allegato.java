@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ALLEGATO")
+@Table(name = "ALLEGATO", schema = "GATEWAY")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
