@@ -15,10 +15,10 @@ public class FamiliareServiceImpl implements FamiliareService
 	private FamiliareDAO familiareDAO;
 	
 	@Override
-	public void insertFamiliare(FamiliareDTO familiare) 
+	public void insertFamiliare(FamiliareDTO familiare, String matricola) 
 	{
 		/* inserimento nuovo familiare */
-		familiareDAO.insertFamiliare(familiare);
+		familiareDAO.insertFamiliare(familiare, matricola);
 	}
 
 	@Override

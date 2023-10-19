@@ -5,6 +5,6 @@ import it.mgg.siapafismw.model.Familiare;
 
 public interface FamiliareDAO 
 {
-	public void insertFamiliare(FamiliareDTO familiare);
+	public void insertFamiliare(FamiliareDTO familiare, String matricola);
 	public Familiare getFamiliareByNumeroTelefono(String numeroTelefono);
 }

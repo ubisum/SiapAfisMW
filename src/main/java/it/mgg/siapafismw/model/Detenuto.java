@@ -39,7 +39,7 @@ public class Detenuto
 	
 	@ManyToMany
     @JoinTable(
-        name = "FAMILIARE_DETENUTO", 
+        name = "GATEWAY.FAMILIARE_DETENUTO", 
         joinColumns = { @JoinColumn(name = "ID_DETENUTO") }, 
         inverseJoinColumns = { @JoinColumn(name = "ID_FAMILIARE")})
     private List<Familiare> familiari = new ArrayList<>();

@@ -26,15 +26,16 @@ public class FamiliareController
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
-	@PostMapping("/SalvaFamiliare")
-	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare)
+	@PostMapping("/SalvaFamiliare/{matricola}")
+	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare, 
+			                                       @PathVariable String matricola)
 	{
 		EsitoDTO esito = new EsitoDTO();
 		HttpStatus status = null;
 		
 		try
 		{
-			familiareService.insertFamiliare(familiare.getFamiliareModel());
+			familiareService.insertFamiliare(familiare.getFamiliareModel(), matricola);
 			esito.setResponseCode("200");
 			esito.setResponseDescription("Familiare aggiunto con successo");
 			status = HttpStatus.OK;

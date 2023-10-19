@@ -38,6 +38,9 @@ public class Familiare
 	@Column(name = "NUMERO_DOCUMENTO")
 	private String numeroDocumento;
 	
+	@Column(name = "GRADO_PARENTELA")
+	private String gradoParentela;
+	
 	@OneToMany(mappedBy = "familiare")
 	private List<Allegato> listaAllegati;
 	

@@ -29,11 +29,11 @@ public class DetenutoController
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
-	@GetMapping("/GetInfoDetenuto/{matricola}")
-	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@PathVariable("matricola") String matricola)
+	@GetMapping("/GetInfoDetenuto")
+	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDTO ricerca)
 	{
 		/* invocazione del service per ricerca detenuto */
-		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(matricola);
+		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 		
 		if(detenuto != null)
 			return ResponseEntity.ok(detenuto);
@@ -42,7 +42,7 @@ public class DetenutoController
 			return ResponseEntity.notFound().build();
 	}
 	
-	@PostMapping("/GetListaDetenuti")
+	@GetMapping("/GetListaDetenuti")
 	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody RicercaDTO ricerca)
 	{
 		try

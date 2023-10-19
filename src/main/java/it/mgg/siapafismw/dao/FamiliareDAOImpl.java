@@ -1,6 +1,7 @@
 package it.mgg.siapafismw.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,8 +14,10 @@ import org.springframework.stereotype.Component;
 import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.model.Allegato;
+import it.mgg.siapafismw.model.Detenuto;
 import it.mgg.siapafismw.model.Familiare;
 import it.mgg.siapafismw.repositories.AllegatoRepository;
+import it.mgg.siapafismw.repositories.DetenutoRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import jakarta.transaction.Transactional;
 
@@ -27,9 +30,12 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	@Autowired
 	private AllegatoRepository allegatoRepository;
 	
+	@Autowired
+	private DetenutoRepository detenutoRepository;
+	
 	@Override
 	@Transactional
-	public void insertFamiliare(FamiliareDTO familiare) 
+	public void insertFamiliare(FamiliareDTO familiare, String matricola) 
 	{
 		/* controllo dati del familiare */
 		if(StringUtils.isBlank(familiare.getNome()))
@@ -55,9 +61,20 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(familiarePresente.isPresent())
 			throw new IllegalArgumentException("Familiare con medesino numero di telefono gia' registrato");
 		
+		/* controllo detenuto */
+		if(StringUtils.isBlank(matricola))
+			throw new IllegalArgumentException("Matricola del detenuto non presente");
+		
+		Optional<Detenuto> optDetenuto = this.detenutoRepository.findById(matricola);
+		if(optDetenuto.isEmpty())
+			throw new IllegalArgumentException("Nessun detenuto presente con la matricola fornita");
+		
 		/* salvataggio familiare */
 		ModelMapper mapper = new ModelMapper();
 		Familiare toDB = mapper.map(familiare, Familiare.class);
+		toDB.setListaAllegati(null);
+		toDB.setListaDetenuti(Arrays.asList(optDetenuto.get()));
+		
 		Familiare familiareSalvato = familiareRepository.save(toDB);
 		
 		/* controllo allegati */
@@ -70,7 +87,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 					listaNomi.add(allegato.getNomeFile());
 				
 				else
-					throw new IllegalArgumentException("");
+					throw new IllegalArgumentException("Il nome di uno degli allegati non e' presente");
 			}
 			
 			List<Allegato> allegatiPresenti = allegatoRepository.findByNomeFileIn(listaNomi);
@@ -86,6 +103,15 @@ public class FamiliareDAOImpl implements FamiliareDAO
 				allegatoRepository.save(allegatoDaSalvare);
 			}
 		}
+		
+		/* aggiornamento detenuto */
+		if(CollectionUtils.isEmpty(optDetenuto.get().getFamiliari()))
+			optDetenuto.get().setFamiliari(Arrays.asList(familiareSalvato));
+		
+		else
+			optDetenuto.get().getFamiliari().add(familiareSalvato);
+		
+		this.detenutoRepository.save(optDetenuto.get());
 	}
 
 	@Override

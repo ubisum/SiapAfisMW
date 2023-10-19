@@ -5,7 +5,6 @@ import java.util.List;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
-import it.mgg.siapafismw.model.Detenuto;
 
 public interface DetenutoService 
 {
