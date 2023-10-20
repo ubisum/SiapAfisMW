@@ -27,19 +27,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	@Override
 	public DetenutoDTO findDetenutoByMatricola(String matricola) 
 	{
-		/* invocazione del DAO per la ricerca del detenuto */
-		Detenuto detenuto = detenutoDAO.findDetenutoByMatricola(matricola);
-		
-		/* output */
-		DetenutoDTO detenutoDTO = null;
-		
-		if(detenuto != null)
-		{
-			ModelMapper mapper = new ModelMapper();
-			detenutoDTO = mapper.map(detenuto, DetenutoDTO.class);
-		}
-		
-		return detenutoDTO;
+		return detenutoDAO.findDetenutoByMatricola(matricola);
 	}
 
 	@Override
@@ -85,7 +73,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	public SlotDisponibileDTO getSlotDisponibili(String matricola) 
 	{
 		/* ricerca detenuto */
-		Detenuto optDetenuto = detenutoDAO.findDetenutoByMatricola(matricola);
+		DetenutoDTO optDetenuto = detenutoDAO.findDetenutoByMatricola(matricola);
 		if(optDetenuto == null)
 			throw new IllegalArgumentException("Nessun detenuto trovato con la matricola fornita");
 		

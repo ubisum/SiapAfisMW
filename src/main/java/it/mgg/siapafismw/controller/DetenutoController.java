@@ -9,13 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.service.DetenutoService;
 
@@ -30,10 +30,10 @@ public class DetenutoController
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
 	@GetMapping("/GetInfoDetenuto")
-	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDTO ricerca)
+	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDetenutoDTO ricerca)
 	{
 		/* invocazione del service per ricerca detenuto */
-		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricolaDetenuto());
+		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 		
 		if(detenuto != null)
 			return ResponseEntity.ok(detenuto);

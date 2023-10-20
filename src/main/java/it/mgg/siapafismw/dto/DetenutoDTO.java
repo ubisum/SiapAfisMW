@@ -1,7 +1,5 @@
 package it.mgg.siapafismw.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ public class DetenutoDTO
 	private String matricola;
 	private String penitenziario;
 	private String sezione;
+	private boolean available;
 	
 	
 	

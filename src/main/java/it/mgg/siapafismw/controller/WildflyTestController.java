@@ -21,7 +21,7 @@ public class WildflyTestController
 	public ResponseEntity<ListaDetenutiDTO> getListaDetenuti(@PathVariable("numTelefono") String numTelefono)
 	{
 		/* creazione di oggetto fittizio */
-		DetenutoDTO detenuto = new DetenutoDTO("Pietro", "Gambadilegno", "AR5695K", "Topolinia", "C");
+		DetenutoDTO detenuto = new DetenutoDTO("Pietro", "Gambadilegno", "AR5695K", "Topolinia", "C", false);
 		/* preparazione risposta */
 		return ResponseEntity.ok(new ListaDetenutiDTO(List.of(detenuto)));
 	}

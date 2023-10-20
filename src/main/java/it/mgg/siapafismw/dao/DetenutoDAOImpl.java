@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.model.Detenuto;
 import it.mgg.siapafismw.model.Familiare;
@@ -30,18 +31,82 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	private EntityManager entityManager;
 	
 	@Override
-	public Detenuto findDetenutoByMatricola(String matricola) 
+	public DetenutoDTO findDetenutoByMatricola(String matricola) 
 	{
 		/* controllo presenza matricola */
 		if(StringUtils.isBlank(matricola))
 			throw new IllegalArgumentException("Il valore della matricola fornito non e' valido");
 		
-		Optional<Detenuto> detenuto = detenutoRepository.findById(matricola);
-		if(detenuto.isEmpty())
-			return null;
+		/* esecuzione query */
+		String query = "SELECT  "
+				+ "  DISTINCT ma.M304_TIPO,  "
+				+ "  ms.M150_NOME,  "
+				+ "  MS.M150_COGN,  "
+				+ "  mm.M00_MAT,  "
+				+ "  mi.M155_NOME,  "
+				+ "  MS2.M157_DEN  "
+				+ "FROM  "
+				+ "  GATEWAY.MDD00_MATRICOLA mm  "
+				+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON ms.M150_ID_SOGG = mm.M00_ID_SOGG  "
+				+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON md.M166_MAT = mm.M00_MAT  "
+				+ "  JOIN GATEWAY.MDD161_CELLA mc ON md.M166_ID_CELLA = mc.M161_ID_CELLA  "
+				+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON mc.M161_ID_ISTITUTO = mi.M155_ID_ISTITUTO  "
+				+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mc.M161_ID_SEZIONE  "
+				+ "  JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = mm.M00_MAT  "
+				+ "WHERE  "
+				+ "  mm.M00_MAT = :matricola  "
+				+ "  AND ma.M304_FUNZ = 'C'  "
+				+ "  AND ma.M304_STATO = 'V'  "
+				+ "  AND mm.M00_DT_CARC_CHIUSA IS NULL  "
+				+ "  AND md.M166_PROG_DISL = ( "
+				+ "    SELECT  "
+				+ "      MAX(md2.M166_PROG_DISL)  "
+				+ "    FROM  "
+				+ "      GATEWAY.MDD166_DISLOCAZ md2  "
+				+ "    WHERE  "
+				+ "      MD2.M166_MAT = md.M166_MAT "
+				+ "  )  "
+				+ "  AND ( "
+				+ "    mm.M00_DT_CANC IS NULL  "
+				+ "    AND ms.M150_DT_CANC IS NULL  "
+				+ "    AND MD.M166_DT_CANC IS NULL  "
+				+ "    AND MS2.M157_DT_CANC IS NULL  "
+				+ "    AND ma.M304_DT_CANC IS NULL "
+				+ "  ) "
+				+ "";
 		
-		else
-			return detenuto.get();
+		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola).getResultList();
+		
+		/* controllo presenza risultati */
+		if(CollectionUtils.isEmpty(listaRisultati))
+			throw new IllegalStateException("Nessun detenuto trovato con la matricola fornita");
+		
+		/* costruzione detenuto */
+		DetenutoDTO detenuto = null;
+		
+		for(Object[] row : listaRisultati)
+		{
+			String tipoAutorizzazione = row[0] != null ? String.valueOf((char)row[0]) : null;
+			
+			if(detenuto == null)
+			{
+				detenuto = new DetenutoDTO();
+				detenuto.setNome((String)row[1]);
+				detenuto.setCognome((String)row[2]);
+				detenuto.setMatricola((String)row[3]);
+				detenuto.setPenitenziario((String)row[4]);
+				detenuto.setSezione((String)row[5]);
+			}
+			
+			if("P".equalsIgnoreCase(tipoAutorizzazione))
+			{
+				detenuto.setAvailable(true);
+				break;
+			}
+		}
+
+		return detenuto;
+		
 	}
 
 	@Override
