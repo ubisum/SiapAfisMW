@@ -33,7 +33,7 @@ public class DetenutoController
 	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDTO ricerca)
 	{
 		/* invocazione del service per ricerca detenuto */
-		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
+		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricolaDetenuto());
 		
 		if(detenuto != null)
 			return ResponseEntity.ok(detenuto);

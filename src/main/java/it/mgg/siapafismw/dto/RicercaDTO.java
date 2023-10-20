@@ -11,5 +11,5 @@ public class RicercaDTO
 {
 	private String numeroTelefonoFamiliare;
 	private String codiceFiscaleFamiliare;
-	private String matricola;
+	private String matricolaDetenuto;
 }

@@ -124,9 +124,25 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		/* ricerca familiare */
 		Optional<Familiare> optFamiliare = this.familiareRepository.findById(numeroTelefono);
 		if(optFamiliare.isEmpty())
-			throw new IllegalArgumentException("Nessun familiare con il teelefono fornito");
+			throw new IllegalArgumentException("Nessun familiare con il telefono fornito");
 		
 		return optFamiliare.get();
+	}
+
+	@Override
+	public Familiare getFamiliareByCodiceFiscale(String codiceFiscale) 
+	{
+		/* controllo numero telefono */
+		if(StringUtils.isBlank(codiceFiscale))
+			throw new IllegalArgumentException("Codice fiscale del familiare non valido");
+		
+		/* ricerca familiare */
+		Optional<Familiare> optFamiliare = this.familiareRepository.findByCodiceFiscale(codiceFiscale);
+		if(optFamiliare.isEmpty())
+			throw new IllegalArgumentException("Nessun familiare con il codice fiscale fornito");
+		
+		return optFamiliare.get();
+		
 	}
 
 }

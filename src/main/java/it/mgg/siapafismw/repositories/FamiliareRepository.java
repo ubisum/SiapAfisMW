@@ -9,4 +9,5 @@ import it.mgg.siapafismw.model.Familiare;
 public interface FamiliareRepository extends JpaRepository<Familiare, String> 
 {
 	public Optional<Familiare> findByTelefono(String telefono);
+	public Optional<Familiare> findByCodiceFiscale(String codiceFiscale);
 }

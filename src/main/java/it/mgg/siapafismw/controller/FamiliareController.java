@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.mgg.siapafismw.dto.EsitoDTO;
+import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.service.FamiliareModelDTO;
 import it.mgg.siapafismw.service.FamiliareService;
 
@@ -54,12 +55,12 @@ public class FamiliareController
 	
 	}
 	
-	@GetMapping("/GetFamiliare/{numeroTelefono}")
-	public ResponseEntity<FamiliareModelDTO> getFamiliare(@PathVariable String numeroTelefono)
+	@GetMapping("/GetFamiliare")
+	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody RicercaDTO ricerca)
 	{
 		try
 		{
-			return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefono(numeroTelefono));
+			return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
 		}
 		
 		catch(Throwable ex)
