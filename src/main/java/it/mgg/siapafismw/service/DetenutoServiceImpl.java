@@ -18,7 +18,7 @@ import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.model.Detenuto;
 
-@Service
+@Service("detenutoServiceImpl")
 public class DetenutoServiceImpl implements DetenutoService
 {
 	@Autowired

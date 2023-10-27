@@ -70,7 +70,8 @@ public class PersistenceJNDIConfig
     		
     		/* attivazione datasource JNDI */
     		//return (DataSource) new JndiTemplate().lookup(env.getProperty(jdbcUrl));
-    		return (DataSource) new JndiTemplate().lookup("java:/middleware");
+//    		return (DataSource) new JndiTemplate().lookup("java:/middleware");
+    		return (DataSource) new JndiTemplate().lookup("java:/MySqlDS");
     	}
     	
     	else

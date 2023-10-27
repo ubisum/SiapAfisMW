@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,7 +27,15 @@ import it.mgg.siapafismw.service.DetenutoService;
 public class DetenutoController 
 {
 	@Autowired
+	@Qualifier("detenutoServiceImpl")
 	private DetenutoService detenutoService;
+	
+	@Autowired
+	@Qualifier("detenutoServiceMockImpl")
+	private DetenutoService detenutoServiceMock;
+	
+	@Value("${siapafismw.mock}")
+	private String mockValue;
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
@@ -33,7 +43,12 @@ public class DetenutoController
 	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDetenutoDTO ricerca)
 	{
 		/* invocazione del service per ricerca detenuto */
-		DetenutoDTO detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
+		DetenutoDTO detenuto = null;
+		if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
+		
+		else
+			detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 		
 		if(detenuto != null)
 			return ResponseEntity.ok(detenuto);
@@ -48,7 +63,12 @@ public class DetenutoController
 		try
 		{
 			/* ricerca dei detenuti */
-			List<DetenutoDTO> listaDetenuti = this.detenutoService.findDetenutiByCFNumeroTelefono(ricerca);
+			List<DetenutoDTO> listaDetenuti = null;
+			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+				listaDetenuti = this.detenutoServiceMock.findDetenutiByCFNumeroTelefono(ricerca);
+			
+			else
+				listaDetenuti = this.detenutoService.findDetenutiByCFNumeroTelefono(ricerca);
 			
 			return ResponseEntity.ok(listaDetenuti);
 		}

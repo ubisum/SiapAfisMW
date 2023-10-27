@@ -2,6 +2,8 @@ package it.mgg.siapafismw.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,7 +25,15 @@ import it.mgg.siapafismw.service.FamiliareService;
 public class FamiliareController 
 {
 	@Autowired
+	@Qualifier("familiareServiceImpl")
 	private FamiliareService familiareService;
+	
+	@Autowired
+	@Qualifier("familiareServiceMockImpl")
+	private FamiliareService familiareServiceMock;
+	
+	@Value("${siapafismw.mock}")
+	private String mockValue;
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	
@@ -36,7 +46,12 @@ public class FamiliareController
 		
 		try
 		{
-			familiareService.insertFamiliare(familiare.getFamiliareModel(), matricola);
+			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+				familiareServiceMock.insertFamiliare(familiare.getFamiliareModel(), matricola);
+			
+			else
+				familiareService.insertFamiliare(familiare.getFamiliareModel(), matricola);
+			
 			esito.setResponseCode("200");
 			esito.setResponseDescription("Familiare aggiunto con successo");
 			status = HttpStatus.OK;
@@ -60,7 +75,11 @@ public class FamiliareController
 	{
 		try
 		{
-			return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+				return ResponseEntity.ok().body(this.familiareServiceMock.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+			
+			else
+				return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
 		}
 		
 		catch(Throwable ex)

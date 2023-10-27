@@ -10,7 +10,7 @@ import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.model.Familiare;
 import it.mgg.siapafismw.utils.ConvertionUtils;
 
-@Service
+@Service("familiareServiceImpl")
 public class FamiliareServiceImpl implements FamiliareService
 {
 	@Autowired
