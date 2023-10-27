@@ -47,6 +47,7 @@ public class DetenutoController
 		if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
 		
+		
 		else
 			detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 		

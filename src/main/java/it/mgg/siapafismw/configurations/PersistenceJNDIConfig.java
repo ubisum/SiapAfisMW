@@ -69,9 +69,9 @@ public class PersistenceJNDIConfig
     			throw new IllegalArgumentException("URL per connessione JNDI non definita");
     		
     		/* attivazione datasource JNDI */
-    		//return (DataSource) new JndiTemplate().lookup(env.getProperty(jdbcUrl));
+    		return (DataSource) new JndiTemplate().lookup(jdbcUrl);
 //    		return (DataSource) new JndiTemplate().lookup("java:/middleware");
-    		return (DataSource) new JndiTemplate().lookup("java:/MySqlDS");
+//    		return (DataSource) new JndiTemplate().lookup("java:/MySqlDS");
     	}
     	
     	else
