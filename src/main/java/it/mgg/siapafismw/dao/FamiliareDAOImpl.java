@@ -56,6 +56,13 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(familiare.getTelefono()) || !familiare.getTelefono().matches("^[0-9]+$"))
 			throw new IllegalArgumentException("Telefono del familiare non valido");
 		
+		if(StringUtils.isBlank(familiare.getDataDocumento()))
+			throw new IllegalArgumentException("Data documento non valida");
+		
+		String dateRegex = "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|20)\\d\\d$";
+		if(!familiare.getDataDocumento().matches(dateRegex))
+			throw new IllegalArgumentException("La data del documennto non e' nel formato dd-MM-yyyy");
+		
 		/* controllo presenza familiare con stesso numero di telefono */
 		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
 		if(familiarePresente.isPresent())

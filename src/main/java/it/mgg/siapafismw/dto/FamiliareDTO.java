@@ -17,6 +17,7 @@ public class FamiliareDTO
 	private String codiceFiscale;
 	private String documento;
 	private String numeroDocumento;
+	private String dataDocumento;
 	private String gradoParentela;
 	private List<AllegatoDTO> listaAllegati;
 }
