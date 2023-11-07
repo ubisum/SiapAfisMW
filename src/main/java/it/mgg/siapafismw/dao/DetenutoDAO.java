@@ -12,4 +12,5 @@ public interface DetenutoDAO
 	public List<Detenuto> getAllDetenuti();
 	public List<Detenuto> getDetenutiByNumeroTelefono(String numeroTelefono);
 	public List<Detenuto> findDetenutiByCFNumeroTelefono(RicercaDTO ricerca);
+	public Integer findIdSoggettoFromMatricola(String matricola);
 }

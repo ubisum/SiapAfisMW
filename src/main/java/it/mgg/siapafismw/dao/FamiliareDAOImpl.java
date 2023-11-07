@@ -1,5 +1,8 @@
 package it.mgg.siapafismw.dao;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,10 +18,23 @@ import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.model.Allegato;
 import it.mgg.siapafismw.model.Detenuto;
+import it.mgg.siapafismw.model.DocumentoTMiddle;
+import it.mgg.siapafismw.model.DocumentoTMiddleId;
 import it.mgg.siapafismw.model.Familiare;
+import it.mgg.siapafismw.model.FamiliareTMiddle;
+import it.mgg.siapafismw.model.FamiliareTMiddleId;
+import it.mgg.siapafismw.model.MatricolaTMiddle;
+import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
+import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
 import it.mgg.siapafismw.repositories.AllegatoRepository;
 import it.mgg.siapafismw.repositories.DetenutoRepository;
+import it.mgg.siapafismw.repositories.DocumentoTMiddleRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
+import it.mgg.siapafismw.repositories.FamiliareTMiddleRepository;
+import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
+import it.mgg.siapafismw.repositories.RelazioneParentelaTMiddleRepository;
+import it.mgg.siapafismw.repositories.TipoDocumentoTMiddleRepository;
+import it.mgg.siapafismw.utils.SiapAfisMWConstants;
 import jakarta.transaction.Transactional;
 
 @Component
@@ -32,6 +48,21 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	
 	@Autowired
 	private DetenutoRepository detenutoRepository;
+	
+	@Autowired
+	private MatricolaTMiddleRepository matricolaRepository;
+	
+	@Autowired
+	private FamiliareTMiddleRepository familiareTMiddleRepository;
+	
+	@Autowired
+	private RelazioneParentelaTMiddleRepository parentelaRepository;
+	
+	@Autowired
+	private DocumentoTMiddleRepository documentoTMiddleRepository;
+	
+	@Autowired
+	private TipoDocumentoTMiddleRepository tipoDocumentoTMiddleRepository;
 	
 	@Override
 	@Transactional
@@ -47,8 +78,16 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(familiare.getCodiceFiscale()))
 			throw new IllegalArgumentException("Codice fiscale del familiare non valido");
 		
+		/* controllo e riceerca del tipo documennto */
 		if(StringUtils.isBlank(familiare.getDocumento()))
 			throw new IllegalArgumentException("Documento del familiare non valido");
+		
+		Optional<TipoDocumentoTMiddle> optTipoDocumento = this.tipoDocumentoTMiddleRepository
+				                       .findByDescrizioneIgnoreCase(familiare.getDocumento());
+		
+		if(optTipoDocumento.isEmpty())
+			throw new IllegalArgumentException("Impossibilee riconoscere il tipo di documento " + 
+		                                       familiare.getDocumento());
 		
 		if(StringUtils.isBlank(familiare.getNumeroDocumento()))
 			throw new IllegalArgumentException("Numero documento del familiare non valido");
@@ -59,9 +98,26 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(familiare.getDataDocumento()))
 			throw new IllegalArgumentException("Data documento non valida");
 		
+		/* controllo e ricerca del grado familiare */
+		if(StringUtils.isBlank(familiare.getGradoParentela()))
+			throw new IllegalArgumentException("Grado parentela non presente");
+		
+		Optional<RelazioneParentelaTMiddle> optRelazione = this.parentelaRepository.findByDescrizioneParentela(familiare.getGradoParentela().toUpperCase());
+		if(optRelazione.isEmpty())
+		{
+			optRelazione = this.parentelaRepository.findByDescrizioneParentela(SiapAfisMWConstants.RELAZIONE_PARENTELA_NON_RILEVATA);
+			if(optRelazione.isEmpty())
+				throw new IllegalArgumentException("Impossibile definire il grado di parentela per il familiare specificato");
+		}
+		
+		/* controllo di conformita' e conversione della data */
 		String dateRegex = "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|20)\\d\\d$";
 		if(!familiare.getDataDocumento().matches(dateRegex))
-			throw new IllegalArgumentException("La data del documennto non e' nel formato dd-MM-yyyy");
+			throw new IllegalArgumentException("La data del documento non e' nel formato dd-MM-yyyy");
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		LocalDate dataDocumento = LocalDate.parse(familiare.getDataDocumento(), formatter);
+		
 		
 		/* controllo presenza familiare con stesso numero di telefono */
 		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
@@ -72,6 +128,47 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(matricola))
 			throw new IllegalArgumentException("Matricola del detenuto non presente");
 		
+		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
+		if(idSoggetto.isEmpty())
+			throw new IllegalArgumentException("Nessun detenuto presente con la matricola specificata");
+		
+		/* ricerca massimo progressivo familiare per l'id soggetto trovato */
+		Integer maxProgressivoFamiliare = this.familiareTMiddleRepository.getMaxPrgFamiliare(idSoggetto.get().getIdSoggetto());
+		
+		/* inserimento familiare su database TMIDDLE */
+		FamiliareTMiddle familiareTM = new FamiliareTMiddle();
+		familiareTM.setFamiliareId(new FamiliareTMiddleId(idSoggetto.get().getIdSoggetto(), 
+				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1));
+		familiareTM.setNome(familiare.getNome());
+		familiareTM.setCognome(familiare.getCognome());
+		familiareTM.setCodiceFiscale(familiare.getCodiceFiscale());
+		familiareTM.setRelazioneParentela(optRelazione.get().getIdParentela());
+		familiareTM.setUtenza(familiare.getTelefono());
+		
+		this.familiareTMiddleRepository.save(familiareTM);
+		
+		/* ricerca progressivo documento */
+		Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
+				                       idSoggetto.get().getIdSoggetto(), 
+				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);		
+		
+		DocumentoTMiddle documentoTM = new DocumentoTMiddle();
+		documentoTM.setDocumentoId(new DocumentoTMiddleId(idSoggetto.get().getIdSoggetto(),
+				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1,
+				                                          progressivoDocumento != null ? progressivoDocumento + 1 : 1, 
+				                                          optTipoDocumento.get().getIdTipoDocumento(), 
+				                                          familiare.getNumeroDocumento(), 
+				                                          dataDocumento));
+		
+		documentoTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+		documentoTM.setDataIns(LocalDateTime.now());
+		
+		this.documentoTMiddleRepository.save(documentoTM);
+		
+//		salvaFamiliareLocalmente(familiare, matricola);
+	}
+
+	private void salvaFamiliareLocalmente(FamiliareDTO familiare, String matricola) {
 		Optional<Detenuto> optDetenuto = this.detenutoRepository.findById(matricola);
 		if(optDetenuto.isEmpty())
 			throw new IllegalArgumentException("Nessun detenuto presente con la matricola fornita");

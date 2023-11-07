@@ -13,8 +13,10 @@ import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.model.Detenuto;
 import it.mgg.siapafismw.model.Familiare;
+import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.repositories.DetenutoRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
+import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -26,6 +28,9 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	
 	@Autowired
 	private FamiliareRepository familiareRepository;
+	
+	@Autowired
+	private MatricolaTMiddleRepository matricolaRepository;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -235,6 +240,18 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		
 		return listaDetenuti;
 		
+	}
+
+	@Override
+	public Integer findIdSoggettoFromMatricola(String matricola) 
+	{
+		/* controllo matricola */
+		if(StringUtils.isBlank(matricola))
+			throw new IllegalArgumentException("Matricola detenuto non valido");
+		
+		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
+		
+		return idSoggetto.isEmpty() ? null : idSoggetto.get().getIdSoggetto();
 	}
 
 }
