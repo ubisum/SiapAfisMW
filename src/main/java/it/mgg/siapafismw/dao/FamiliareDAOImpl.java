@@ -11,6 +11,8 @@ import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ import it.mgg.siapafismw.model.FamiliareTMiddle;
 import it.mgg.siapafismw.model.FamiliareTMiddleId;
 import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
+import it.mgg.siapafismw.model.SalvaFamiliareTracking;
+import it.mgg.siapafismw.model.SalvaFamiliareTrackingId;
 import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
 import it.mgg.siapafismw.repositories.AllegatoRepository;
 import it.mgg.siapafismw.repositories.DetenutoRepository;
@@ -33,6 +37,7 @@ import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.FamiliareTMiddleRepository;
 import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
 import it.mgg.siapafismw.repositories.RelazioneParentelaTMiddleRepository;
+import it.mgg.siapafismw.repositories.SalvaFamiliareTrackingRepository;
 import it.mgg.siapafismw.repositories.TipoDocumentoTMiddleRepository;
 import it.mgg.siapafismw.utils.SiapAfisMWConstants;
 import jakarta.transaction.Transactional;
@@ -63,6 +68,11 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	
 	@Autowired
 	private TipoDocumentoTMiddleRepository tipoDocumentoTMiddleRepository;
+	
+	@Autowired
+	private SalvaFamiliareTrackingRepository familiareTrackingRepository;
+	
+	private static final Logger logger = LoggerFactory.getLogger(FamiliareDAOImpl.class);
 	
 	@Override
 	@Transactional
@@ -164,6 +174,16 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		documentoTM.setDataIns(LocalDateTime.now());
 		
 		this.documentoTMiddleRepository.save(documentoTM);
+		
+		/* aggiunta record tracking */
+		SalvaFamiliareTracking salvaFamiliare = new SalvaFamiliareTracking(
+				                                    new SalvaFamiliareTrackingId(idSoggetto.get().getIdSoggetto(), 
+				                                    		                     maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1), 
+				                                    LocalDateTime.now());
+		
+		this.familiareTrackingRepository.save(salvaFamiliare);
+//		this.documentoTMiddleRepository.save(documentoTM);
+
 		
 //		salvaFamiliareLocalmente(familiare, matricola);
 	}

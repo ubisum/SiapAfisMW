@@ -2,6 +2,8 @@ package it.mgg.siapafismw.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.mgg.siapafismw.dao.FamiliareDAOImpl;
 import it.mgg.siapafismw.dto.EsitoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
@@ -38,6 +41,8 @@ public class FamiliareController
 	private String mockValue;
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
+	private static final Logger logger = LoggerFactory.getLogger(FamiliareDAOImpl.class);
+
 	
 	@PostMapping("/SalvaFamiliare/{matricola}")
 	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare, 
@@ -75,8 +80,11 @@ public class FamiliareController
 	@GetMapping("/GetFamiliare")
 	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
+		logger.info("Accesso al servizio GetFamiliare");
+		
 		try
 		{
+			logger.info("Mapping delle informazioni in input");
 			ModelMapper mapper = new ModelMapper();
 			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
 			

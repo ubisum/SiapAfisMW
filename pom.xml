@@ -123,6 +123,12 @@
 					<version>11.5.8.0</version>
 				</dependency>
 
+				<dependency>
+					<groupId>net.logstash.logback</groupId>
+					<artifactId>logstash-logback-encoder</artifactId>
+					<version>6.6</version>
+				</dependency>
+
 
 			</dependencies>
 		</profile>
@@ -270,6 +276,12 @@
 					<groupId>com.ibm.db2</groupId>
 					<artifactId>jcc</artifactId>
 					<version>11.5.8.0</version>
+				</dependency>
+
+				<dependency>
+					<groupId>net.logstash.logback</groupId>
+					<artifactId>logstash-logback-encoder</artifactId>
+					<version>6.6</version>
 				</dependency>
 
 
