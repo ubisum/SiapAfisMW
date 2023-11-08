@@ -120,9 +120,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		
 		/* controllo presenza familiare con stesso numero di telefono */
-		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
-		if(familiarePresente.isPresent())
-			throw new IllegalArgumentException("Familiare con medesino numero di telefono gia' registrato");
+//		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
+//		if(familiarePresente.isPresent())
+//			throw new IllegalArgumentException("Familiare con medesino numero di telefono gia' registrato");
 		
 		/* controllo detenuto */
 		if(StringUtils.isBlank(matricola))

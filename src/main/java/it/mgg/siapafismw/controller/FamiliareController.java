@@ -1,6 +1,7 @@
 package it.mgg.siapafismw.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.mgg.siapafismw.dto.EsitoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.service.FamiliareModelDTO;
 import it.mgg.siapafismw.service.FamiliareService;
 
@@ -71,10 +73,13 @@ public class FamiliareController
 	}
 	
 	@GetMapping("/GetFamiliare")
-	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody RicercaDTO ricerca)
+	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
 		try
 		{
+			ModelMapper mapper = new ModelMapper();
+			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
+			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 				return ResponseEntity.ok().body(this.familiareServiceMock.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
 			

@@ -3,6 +3,7 @@ package it.mgg.siapafismw.controller;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.service.DetenutoService;
 
@@ -59,12 +61,15 @@ public class DetenutoController
 	}
 	
 	@GetMapping("/GetListaDetenuti")
-	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody RicercaDTO ricerca)
+	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody SimpleRicercaDTO simpleicerca)
 	{
 		try
 		{
 			/* ricerca dei detenuti */
 			List<DetenutoDTO> listaDetenuti = null;
+			ModelMapper mapper = new ModelMapper();
+			RicercaDTO ricerca = mapper.map(simpleicerca, RicercaDTO.class);
+			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 				listaDetenuti = this.detenutoServiceMock.findDetenutiByCFNumeroTelefono(ricerca);
 			
