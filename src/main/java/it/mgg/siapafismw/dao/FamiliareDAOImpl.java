@@ -78,52 +78,93 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	@Transactional
 	public void insertFamiliare(FamiliareDTO familiare, String matricola) 
 	{
+		logger.info("Accesso al DAO per l'inserimento del familiare...");
+		
 		/* controllo dati del familiare */
 		if(StringUtils.isBlank(familiare.getNome()))
+		{
+			logger.info("Nome del familiare on valido");
 			throw new IllegalArgumentException("Nome del familiare non valido");
+		}
 		
 		if(StringUtils.isBlank(familiare.getCognome()))
+		{
+			logger.info("Cognome del familiare non valido");
 			throw new IllegalArgumentException("Cognome del familiare non valido");
+		}
 		
 		if(StringUtils.isBlank(familiare.getCodiceFiscale()))
+		{
+			logger.info("Codice fiscale del familiare non valido");
 			throw new IllegalArgumentException("Codice fiscale del familiare non valido");
+		}
 		
 		/* controllo e riceerca del tipo documennto */
 		if(StringUtils.isBlank(familiare.getDocumento()))
+		{
+			logger.info("Documento del familiare non valido");
 			throw new IllegalArgumentException("Documento del familiare non valido");
+		}
 		
+		logger.info("Ricerca tipo documento...");
 		Optional<TipoDocumentoTMiddle> optTipoDocumento = this.tipoDocumentoTMiddleRepository
 				                       .findByDescrizioneIgnoreCase(familiare.getDocumento());
 		
 		if(optTipoDocumento.isEmpty())
-			throw new IllegalArgumentException("Impossibilee riconoscere il tipo di documento " + 
+		{
+			logger.info("Impossibile riconoscere il tipo di documento {}",familiare.getDocumento());
+			throw new IllegalArgumentException("Impossibile riconoscere il tipo di documento " + 
 		                                       familiare.getDocumento());
+		}
 		
 		if(StringUtils.isBlank(familiare.getNumeroDocumento()))
+		{
+			logger.info("Numero documento del familiare non valido");
 			throw new IllegalArgumentException("Numero documento del familiare non valido");
+		}
 		
 		if(StringUtils.isBlank(familiare.getTelefono()) || !familiare.getTelefono().matches("^[0-9]+$"))
+		{
+			logger.info("Telefono del familiare non valido");
 			throw new IllegalArgumentException("Telefono del familiare non valido");
+		}
 		
 		if(StringUtils.isBlank(familiare.getDataDocumento()))
+		{
+			logger.info("Data documento non valida");
 			throw new IllegalArgumentException("Data documento non valida");
+		}
 		
 		/* controllo e ricerca del grado familiare */
 		if(StringUtils.isBlank(familiare.getGradoParentela()))
+		{
+			logger.info("Grado parentela non presente");
 			throw new IllegalArgumentException("Grado parentela non presente");
+		}
 		
+		logger.info("Ricerca del grado parentela...");
 		Optional<RelazioneParentelaTMiddle> optRelazione = this.parentelaRepository.findByDescrizioneParentela(familiare.getGradoParentela().toUpperCase());
 		if(optRelazione.isEmpty())
 		{
+			logger.info("Impossibile trovare il grado di parentela {}. Si prova ad cercare ua relazione di default...", familiare.getGradoParentela());
 			optRelazione = this.parentelaRepository.findByDescrizioneParentela(SiapAfisMWConstants.RELAZIONE_PARENTELA_NON_RILEVATA);
 			if(optRelazione.isEmpty())
+			{
+				logger.info("Impossibile definire il grado di parentela per il familiare specificato");
 				throw new IllegalArgumentException("Impossibile definire il grado di parentela per il familiare specificato");
+			}
 		}
+		
+		logger.info("Trovata relazione di parentela {}", optRelazione.get().getDescrizioneParentela());
 		
 		/* controllo di conformita' e conversione della data */
 		String dateRegex = "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(19|20)\\d\\d$";
+		logger.info("Controllo data con regex {}", dateRegex);
 		if(!familiare.getDataDocumento().matches(dateRegex))
+		{
+			logger.info("La data del documento non e' nel formato dd-MM-yyyy e/o contiene caratteri non validi");
 			throw new IllegalArgumentException("La data del documento non e' nel formato dd-MM-yyyy");
+		}
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		LocalDate dataDocumento = LocalDate.parse(familiare.getDataDocumento(), formatter);
@@ -136,16 +177,26 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		/* controllo detenuto */
 		if(StringUtils.isBlank(matricola))
+		{
+			logger.info("Matricola del detenuto non presente");
 			throw new IllegalArgumentException("Matricola del detenuto non presente");
+		}
 		
+		logger.info("Ricerca ID soggetto...");
 		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
 		if(idSoggetto.isEmpty())
+		{
+			logger.info("Nessun detenuto presente con la matricola specificata");
 			throw new IllegalArgumentException("Nessun detenuto presente con la matricola specificata");
+		}
 		
 		/* ricerca massimo progressivo familiare per l'id soggetto trovato */
+		logger.info("Ricerca massimo progressivo familiare...");
 		Integer maxProgressivoFamiliare = this.familiareTMiddleRepository.getMaxPrgFamiliare(idSoggetto.get().getIdSoggetto());
+		logger.info("Prossimo progressivo familiare che verra' utilizzato: {}", maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
 		
 		/* inserimento familiare su database TMIDDLE */
+		logger.info("Preparazione dell'oggetto FAMILIARE per il salvataggio...");
 		FamiliareTMiddle familiareTM = new FamiliareTMiddle();
 		familiareTM.setFamiliareId(new FamiliareTMiddleId(idSoggetto.get().getIdSoggetto(), 
 				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1));
@@ -157,11 +208,17 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		this.familiareTMiddleRepository.save(familiareTM);
 		
+		logger.info("Effettuata operazione SAVE del familiare");
+		
 		/* ricerca progressivo documento */
+		logger.info("Ricerca del prossimo progressivo per l'inserimento del documeto...");
 		Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
 				                       idSoggetto.get().getIdSoggetto(), 
-				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);		
+				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);	
 		
+		logger.info("Prossimo progressivo documento che verra' utilizzato: {}", progressivoDocumento != null ? progressivoDocumento + 1 : 1);
+		
+		logger.info("Preparazione dell'oggetto per il salvataggio del documento...");
 		DocumentoTMiddle documentoTM = new DocumentoTMiddle();
 		documentoTM.setDocumentoId(new DocumentoTMiddleId(idSoggetto.get().getIdSoggetto(),
 				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1,
@@ -175,17 +232,21 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		this.documentoTMiddleRepository.save(documentoTM);
 		
+		logger.info("Effettuata operazione SAVE del documento");
+		
 		/* aggiunta record tracking */
+		logger.info("Creazione dell'oggetto per l'inserimento sulla tabella di tracking dell'operazione di salvataggio del familiare...");
 		SalvaFamiliareTracking salvaFamiliare = new SalvaFamiliareTracking(
 				                                    new SalvaFamiliareTrackingId(idSoggetto.get().getIdSoggetto(), 
 				                                    		                     maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1), 
 				                                    LocalDateTime.now());
 		
 		this.familiareTrackingRepository.save(salvaFamiliare);
-//		this.documentoTMiddleRepository.save(documentoTM);
-
 		
-//		salvaFamiliareLocalmente(familiare, matricola);
+		logger.info("Effettuata operazione SAVE dei dati di tracking");
+		
+		logger.info("Fine metodo DAO per inserimento familiare");
+
 	}
 
 	private void salvaFamiliareLocalmente(FamiliareDTO familiare, String matricola) {

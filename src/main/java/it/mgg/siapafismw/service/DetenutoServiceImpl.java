@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,10 +25,13 @@ public class DetenutoServiceImpl implements DetenutoService
 {
 	@Autowired
 	private DetenutoDAO detenutoDAO;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DetenutoServiceImpl.class);
 
 	@Override
 	public DetenutoDTO findDetenutoByMatricola(String matricola) 
 	{
+		logger.info("Accesso al servizio di ricerca del deteuto per matricola...");
 		return detenutoDAO.findDetenutoByMatricola(matricola);
 	}
 
@@ -102,6 +107,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	public List<DetenutoDTO> findDetenutiByCFNumeroTelefono(@RequestBody RicercaDTO ricerca) 
 	{
 		/* ricerca detenuti nel DAO */
+		logger.info("Accesso al servizio per la ricerca del detenunto sulla base del codice fiscale o del numero di telefono");
 		List<Detenuto> listaDetenuti = detenutoDAO.findDetenutiByCFNumeroTelefono(ricerca);
 		
 		/* lista output */
@@ -109,12 +115,16 @@ public class DetenutoServiceImpl implements DetenutoService
 		
 		if(CollectionUtils.isNotEmpty(listaDetenuti))
 		{
+			logger.info("Trovati {} detenuti. Inizio conversione dati in DTO...", listaDetenuti.size());
 			ModelMapper mapper = new ModelMapper();
 			
 			for(Detenuto detenuto : listaDetenuti)
 				listaDTO.add(mapper.map(detenuto, DetenutoDTO.class));
 			
 		}
+		
+		else
+			logger.info("Nessun detenuto trovato");
 		
 		return listaDTO;
 	}

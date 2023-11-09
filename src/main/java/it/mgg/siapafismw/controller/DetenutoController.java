@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.mgg.siapafismw.dao.FamiliareDAOImpl;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
@@ -40,41 +43,66 @@ public class DetenutoController
 	private String mockValue;
 	
 	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
+	private static final Logger logger = LoggerFactory.getLogger(DetenutoController.class);
 	
 	@GetMapping("/GetInfoDetenuto")
 	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDetenutoDTO ricerca)
 	{
+		logger.info("Accesso all'endpoint GetInfoDetenuto");
+		
 		/* invocazione del service per ricerca detenuto */
 		DetenutoDTO detenuto = null;
 		if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+		{
+			logger.info("Invocazione del servizio mock per la ricerca delle informazioni del detenuto...");
 			detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
+		}
 		
 		
 		else
+		{
+			logger.info("Invocazione del servizio per la ricerca delle informazioni del detenuto...");
 			detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
+		}
 		
 		if(detenuto != null)
+		{
+			logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
 			return ResponseEntity.ok(detenuto);
+		}
 		
 		else
+		{
+			logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
 			return ResponseEntity.notFound().build();
+		}
 	}
 	
 	@GetMapping("/GetListaDetenuti")
-	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody SimpleRicercaDTO simpleicerca)
+	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
+		logger.info("Accesso all'endpoint GetListaDetenuti");
+		
 		try
 		{
 			/* ricerca dei detenuti */
 			List<DetenutoDTO> listaDetenuti = null;
+			
+			logger.info("Mapping dei dati in ingresso...");
 			ModelMapper mapper = new ModelMapper();
-			RicercaDTO ricerca = mapper.map(simpleicerca, RicercaDTO.class);
+			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
 			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			{
+				logger.info("Invocazione servizio mock per ricerca lista detenuti di un familiare...");
 				listaDetenuti = this.detenutoServiceMock.findDetenutiByCFNumeroTelefono(ricerca);
+			}
 			
 			else
+			{
+				logger.info("Invocazione servizio per ricerca lista detenuti di un familiare...");
 				listaDetenuti = this.detenutoService.findDetenutiByCFNumeroTelefono(ricerca);
+			}
 			
 			return ResponseEntity.ok(listaDetenuti);
 		}
@@ -86,34 +114,34 @@ public class DetenutoController
 		}
 	}
 	
-	@GetMapping("/GetSlotDisponibili/{matricola}")
-	public ResponseEntity<SlotDisponibileDTO> getSlotDisponibili(@PathVariable String matricola)
-	{
-		SlotDisponibileDTO slot = null;
-		HttpStatus status = null;
-		
-		try
-		{
-			slot = detenutoService.getSlotDisponibili(matricola);
-			slot.setResponseCode("200");
-			slot.setRespondeDescription("Ricerca slot conclusa con successo");
-			
-			status = HttpStatus.OK;
-		}
-		
-		catch(Throwable ex)
-		{
-			ex.printStackTrace();
-			
-			slot = new SlotDisponibileDTO();
-			slot.setResponseCode("500");
-			slot.setRespondeDescription(StringUtils.isNotBlank(ex.getMessage()) ? 
-					ex.getMessage() : INTERNAL_SERVER_ERROR);
-			
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-		}
-		
-		return ResponseEntity.status(status).body(slot);
-		
-	}
+//	@GetMapping("/GetSlotDisponibili/{matricola}")
+//	public ResponseEntity<SlotDisponibileDTO> getSlotDisponibili(@PathVariable String matricola)
+//	{
+//		SlotDisponibileDTO slot = null;
+//		HttpStatus status = null;
+//		
+//		try
+//		{
+//			slot = detenutoService.getSlotDisponibili(matricola);
+//			slot.setResponseCode("200");
+//			slot.setRespondeDescription("Ricerca slot conclusa con successo");
+//			
+//			status = HttpStatus.OK;
+//		}
+//		
+//		catch(Throwable ex)
+//		{
+//			ex.printStackTrace();
+//			
+//			slot = new SlotDisponibileDTO();
+//			slot.setResponseCode("500");
+//			slot.setRespondeDescription(StringUtils.isNotBlank(ex.getMessage()) ? 
+//					ex.getMessage() : INTERNAL_SERVER_ERROR);
+//			
+//			status = HttpStatus.INTERNAL_SERVER_ERROR;
+//		}
+//		
+//		return ResponseEntity.status(status).body(slot);
+//		
+//	}
 }

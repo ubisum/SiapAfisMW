@@ -2,6 +2,8 @@ package it.mgg.siapafismw.service;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import it.mgg.siapafismw.dto.AllegatoDTO;
@@ -9,8 +11,10 @@ import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 
 @Service("familiareServiceMockImpl")
-public class FamiliareServiceMockImpl implements FamiliareService {
-
+public class FamiliareServiceMockImpl implements FamiliareService 
+{
+	private static final Logger logger = LoggerFactory.getLogger(FamiliareServiceMockImpl.class);
+	
 	@Override
 	public void insertFamiliare(FamiliareDTO familiare, String matricola) {
 		return;
@@ -18,7 +22,10 @@ public class FamiliareServiceMockImpl implements FamiliareService {
 	}
 
 	@Override
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(RicercaDTO ricerca) {
+	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(RicercaDTO ricerca) 
+	{
+		logger.info("Accesso al servizio mock per la ricerca del familiare...");
+		logger.info("Creazione dell'oggeetto da restituire...");
 		
 		/* MOCK */
 		FamiliareModelDTO modelDTO = new FamiliareModelDTO();
@@ -39,6 +46,8 @@ public class FamiliareServiceMockImpl implements FamiliareService {
 		familiare.getListaAllegati().add(allegato2);
 		
 		modelDTO.setFamiliareModel(familiare);
+		
+		logger.info("Fine creazione dell'oggetto");
 		
 		return modelDTO;
 	}

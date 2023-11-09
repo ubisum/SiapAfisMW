@@ -48,24 +48,37 @@ public class FamiliareController
 	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare, 
 			                                       @PathVariable String matricola)
 	{
+		logger.info("Accesso all'endpoint SalvaFamiliare");
+		
 		EsitoDTO esito = new EsitoDTO();
 		HttpStatus status = null;
 		
 		try
 		{
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			{
+				logger.info("Invocazione del servizio mock per l'inserimento del familiare...");
 				familiareServiceMock.insertFamiliare(familiare.getFamiliareModel(), matricola);
+			}
 			
 			else
+			{
+				logger.info("Invocazione del servizio per l'inserimento del familiare...");
 				familiareService.insertFamiliare(familiare.getFamiliareModel(), matricola);
+			}
 			
 			esito.setResponseCode("200");
 			esito.setResponseDescription("Familiare aggiunto con successo");
 			status = HttpStatus.OK;
+			
+			logger.info("Preparazione risposta con codice 200...");
 		}
 		
 		catch(Throwable ex)
 		{
+			logger.info("Si e' verificato un errore interno", ex);
+			logger.info("Preparazione risposta con codice 500...");
+			
 			ex.printStackTrace();
 			esito.setResponseCode("500");
 			esito.setResponseDescription(StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : INTERNAL_SERVER_ERROR);
@@ -80,7 +93,7 @@ public class FamiliareController
 	@GetMapping("/GetFamiliare")
 	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
-		logger.info("Accesso al servizio GetFamiliare");
+		logger.info("Accesso all'endpoint GetFamiliare");
 		
 		try
 		{
@@ -89,14 +102,23 @@ public class FamiliareController
 			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
 			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			{
+				logger.info("Invocazione del servizio mock per la ricerca del familiare...");
 				return ResponseEntity.ok().body(this.familiareServiceMock.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+			}
 			
 			else
+			{
+				logger.info("Invocazione del servizio per la ricerca del familiare...");
 				return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+			}
 		}
 		
 		catch(Throwable ex)
 		{
+			logger.info("Si e' verificata un'eccezione interna", ex);
+			logger.info("Preparazione risposta con codice 500...");
+			
 			ex.printStackTrace();
 			return ResponseEntity.internalServerError().body(null);
 		}	

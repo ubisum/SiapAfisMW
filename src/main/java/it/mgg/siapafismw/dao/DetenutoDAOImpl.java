@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.repositories.DetenutoRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
+import it.mgg.siapafismw.service.DetenutoServiceImpl;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -35,12 +38,17 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	@PersistenceContext
 	private EntityManager entityManager;
 	
+	private static final Logger logger = LoggerFactory.getLogger(DetenutoDAOImpl.class);
+	
 	@Override
 	public DetenutoDTO findDetenutoByMatricola(String matricola) 
 	{
 		/* controllo presenza matricola */
 		if(StringUtils.isBlank(matricola))
+		{
+			logger.info("Il valore della matricola fornito non e' valido");
 			throw new IllegalArgumentException("Il valore della matricola fornito non e' valido");
+		}
 		
 		/* esecuzione query */
 		String query = "SELECT  "
@@ -80,15 +88,22 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ "  ) "
 				+ "";
 		
+		logger.info("Esecuzione query nativa...");
 		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola).getResultList();
 		
 		/* controllo presenza risultati */
 		if(CollectionUtils.isEmpty(listaRisultati))
+		{
+			logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
 			throw new IllegalStateException("Nessun detenuto trovato con la matricola fornita");
+		}
+		
+		logger.info("Numero risultati trovati: {}", listaRisultati.size());
 		
 		/* costruzione detenuto */
 		DetenutoDTO detenuto = null;
 		
+		logger.info("Preparazione oggetto di output...");
 		for(Object[] row : listaRisultati)
 		{
 			String tipoAutorizzazione = row[0] != null ? String.valueOf((char)row[0]) : null;
@@ -109,6 +124,8 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				break;
 			}
 		}
+		
+		logger.info("Terminata preparazione oggetto di output, con flag available = {}", detenuto.isAvailable());
 
 		return detenuto;
 		
@@ -139,12 +156,22 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	@Override
 	public List<Detenuto> findDetenutiByCFNumeroTelefono(RicercaDTO ricerca) 
 	{
+		logger.info("Accesso alla funzione DAO per la ricerca dei detenuti in base al CF "
+				  + "od al numero telefonico del familiare...");
+		
 		/* controlli */
 		if(ricerca == null)
+		{
+			logger.info("DTO di ricerca non presente");
 			throw new IllegalArgumentException("DTO di ricerca non presente");
+		}
 		
-		if(StringUtils.isBlank(ricerca.getCodiceFiscaleFamiliare()) && StringUtils.isBlank(ricerca.getNumeroTelefonoFamiliare()))
-				throw new IllegalArgumentException("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare");
+		if(StringUtils.isBlank(ricerca.getCodiceFiscaleFamiliare()) && 
+		   StringUtils.isBlank(ricerca.getNumeroTelefonoFamiliare()))
+		{
+			logger.info("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare");
+			throw new IllegalArgumentException("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare");
+		}
 		
 		/* definizione query */
 		String query = null;
@@ -215,15 +242,22 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		
 		/* inserimento parametri */
 		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
+		{
+			logger.info("Preparazione query per ricerca in base al CF...");
 			listaOutput = entityManager.createNativeQuery(query).setParameter("codiceFiscale", ricerca.getCodiceFiscaleFamiliare()).getResultList();
+		}
 		
 		else
+		{
+			logger.info("Preparazione query per ricerca in base al numero di telefono...");
 			listaOutput = entityManager.createNativeQuery(query).setParameter("utenza", ricerca.getNumeroTelefonoFamiliare()).getResultList();
-
+		}
 			
 		/* creazione lista detenuti */
 		if(CollectionUtils.isNotEmpty(listaOutput))
 		{
+			logger.info("Creazione lista di {} detenuti...", listaOutput.size());
+			
 			for(Object[] array : listaOutput)
 			{
 				Detenuto detenuto = new Detenuto();
@@ -237,6 +271,9 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				
 			}
 		}
+		
+		else
+			logger.info("Nessun detenuto trovato");
 		
 		return listaDetenuti;
 		
