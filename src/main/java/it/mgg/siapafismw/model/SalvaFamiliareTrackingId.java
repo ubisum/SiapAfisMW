@@ -18,4 +18,5 @@ public class SalvaFamiliareTrackingId implements Serializable
 {
 	private Integer ID_SOGGETTO;
 	private Integer PROGRESSIVO_FAMILIARE;
+	private Integer PROGRESSIVO_DOCUMENTO_FAMILIARE;
 }

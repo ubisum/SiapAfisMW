@@ -169,12 +169,6 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		LocalDate dataDocumento = LocalDate.parse(familiare.getDataDocumento(), formatter);
 		
-		
-		/* controllo presenza familiare con stesso numero di telefono */
-//		Optional<Familiare> familiarePresente = familiareRepository.findByTelefono(familiare.getTelefono());
-//		if(familiarePresente.isPresent())
-//			throw new IllegalArgumentException("Familiare con medesino numero di telefono gia' registrato");
-		
 		/* controllo detenuto */
 		if(StringUtils.isBlank(matricola))
 		{
@@ -195,6 +189,11 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		Integer maxProgressivoFamiliare = this.familiareTMiddleRepository.getMaxPrgFamiliare(idSoggetto.get().getIdSoggetto());
 		logger.info("Prossimo progressivo familiare che verra' utilizzato: {}", maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
 		
+		logger.info("Ricerca del prossimo progressivo per l'inserimento del documeto...");
+		Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
+				                       idSoggetto.get().getIdSoggetto(), 
+				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);	
+		
 		/* inserimento familiare su database TMIDDLE */
 		logger.info("Preparazione dell'oggetto FAMILIARE per il salvataggio...");
 		FamiliareTMiddle familiareTM = new FamiliareTMiddle();
@@ -209,14 +208,6 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		this.familiareTMiddleRepository.save(familiareTM);
 		
 		logger.info("Effettuata operazione SAVE del familiare");
-		
-		/* ricerca progressivo documento */
-		logger.info("Ricerca del prossimo progressivo per l'inserimento del documeto...");
-		Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
-				                       idSoggetto.get().getIdSoggetto(), 
-				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);	
-		
-		logger.info("Prossimo progressivo documento che verra' utilizzato: {}", progressivoDocumento != null ? progressivoDocumento + 1 : 1);
 		
 		logger.info("Preparazione dell'oggetto per il salvataggio del documento...");
 		DocumentoTMiddle documentoTM = new DocumentoTMiddle();
@@ -234,17 +225,27 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		logger.info("Effettuata operazione SAVE del documento");
 		
-		/* aggiunta record tracking */
-		logger.info("Creazione dell'oggetto per l'inserimento sulla tabella di tracking dell'operazione di salvataggio del familiare...");
-		SalvaFamiliareTracking salvaFamiliare = new SalvaFamiliareTracking(
-				                                    new SalvaFamiliareTrackingId(idSoggetto.get().getIdSoggetto(), 
-				                                    		                     maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1), 
-				                                    LocalDateTime.now());
+		logger.info("Preparazione record per tabella di tracking...");
+		SalvaFamiliareTracking tracking = new SalvaFamiliareTracking();
+		tracking.setSalvaFamiliareTrackigId(new SalvaFamiliareTrackingId(
+				                            idSoggetto.get().getIdSoggetto(), 
+				                            maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1, 
+				                            progressivoDocumento != null ? progressivoDocumento + 1 : 1));
 		
-		this.familiareTrackingRepository.save(salvaFamiliare);
+		tracking.setNomeFamiliare(familiare.getNome());
+		tracking.setCognomeFamiliare(familiare.getCognome());
+		tracking.setCodiceFiscaleFamiliare(familiare.getCodiceFiscale());
+		tracking.setRelazioneParentela(optRelazione.get().getIdParentela());
+		tracking.setUtenzaFamiliare(familiare.getTelefono());
+		tracking.setTipoDocumentoFamiliare(optTipoDocumento.get().getIdTipoDocumento());
+		tracking.setNumeroDocumentoFamiliare(familiare.getNumeroDocumento());
+		tracking.setDataDocumentoFamiliare(dataDocumento);
+		tracking.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+		tracking.setDataInserimento(LocalDateTime.now());
+		
+		this.familiareTrackingRepository.save(tracking);
 		
 		logger.info("Effettuata operazione SAVE dei dati di tracking");
-		
 		logger.info("Fine metodo DAO per inserimento familiare");
 
 	}
