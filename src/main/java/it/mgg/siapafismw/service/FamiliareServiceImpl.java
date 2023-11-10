@@ -4,11 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import it.mgg.siapafismw.dao.FamiliareDAO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
-import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.Familiare;
 import it.mgg.siapafismw.utils.ConvertionUtils;
 
@@ -21,7 +23,7 @@ public class FamiliareServiceImpl implements FamiliareService
 	private static final Logger logger = LoggerFactory.getLogger(FamiliareServiceImpl.class);
 	
 	@Override
-	public void insertFamiliare(FamiliareDTO familiare, String matricola) 
+	public void insertFamiliare(FamiliareDTO familiare, String matricola) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al servizio per l'inserimeto del familiare...");
 		
@@ -32,7 +34,7 @@ public class FamiliareServiceImpl implements FamiliareService
 	}
 
 	@Override
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(RicercaDTO ricerca) 
+	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al servizio per la ricerca del familiare...");
 		
@@ -42,29 +44,15 @@ public class FamiliareServiceImpl implements FamiliareService
 			logger.info("Fornire almeno uno tra codice fiscale e numero di "
 					+ " telefono del familiare");
 			
-			throw new IllegalArgumentException("Fornire almeno uno tra codice fiscale e numero di "
-					                         + " telefono del familiare");
+			throw new SiapAfisMWException("Fornire almeno uno tra codice fiscale e numero di "
+					                         + " telefono del familiare", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* oggetto output */
 		FamiliareModelDTO model = new FamiliareModelDTO();
 		
 		/* ricerca familiare */
-		Familiare familiare = null;
-		
-		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
-		{
-			logger.info("Rilevata preseza del codice fiscale {}. "
-					+ "Si utilizza questa informazione peer la ricerca del familiare...", ricerca.getCodiceFiscaleFamiliare());
-			familiare = this.familiareDAO.getFamiliareByCodiceFiscale(ricerca.getCodiceFiscaleFamiliare());
-		}
-		
-		else
-		{
-			logger.info("Codice fiscale non trovato. Si utilizza il numero di telefono {} "
-					+ "per effettuare la ricerca", ricerca.getNumeroTelefonoFamiliare());
-			familiare = this.familiareDAO.getFamiliareByNumeroTelefono(ricerca.getNumeroTelefonoFamiliare());
-		}
+		Familiare familiare = familiareDAO.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca);
 		
 		/* conversione */
 		if(familiare != null)

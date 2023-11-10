@@ -21,6 +21,7 @@ import it.mgg.siapafismw.dao.FamiliareDAOImpl;
 import it.mgg.siapafismw.dto.EsitoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.service.FamiliareModelDTO;
 import it.mgg.siapafismw.service.FamiliareService;
 
@@ -74,12 +75,19 @@ public class FamiliareController
 			logger.info("Preparazione risposta con codice 200...");
 		}
 		
+		catch(SiapAfisMWException ex)
+		{
+			logger.info("Si e' verificata un'eccezione", ex);
+			esito.setResponseCode(ex.getStatus().toString());
+			esito.setResponseDescription(ex.getMessage());
+			status = ex.getStatus();
+		}
+		
 		catch(Throwable ex)
 		{
 			logger.info("Si e' verificato un errore interno", ex);
 			logger.info("Preparazione risposta con codice 500...");
 			
-			ex.printStackTrace();
 			esito.setResponseCode("500");
 			esito.setResponseDescription(StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : INTERNAL_SERVER_ERROR);
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -96,22 +104,26 @@ public class FamiliareController
 		logger.info("Accesso all'endpoint GetFamiliare");
 		
 		try
-		{
-			logger.info("Mapping delle informazioni in input");
-			ModelMapper mapper = new ModelMapper();
-			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
+		{			
 			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{
 				logger.info("Invocazione del servizio mock per la ricerca del familiare...");
-				return ResponseEntity.ok().body(this.familiareServiceMock.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+				return ResponseEntity.ok().body(this.familiareServiceMock.getFamiliareByNumeroTelefonoCodiceFiscale(simpleRicerca));
 			}
 			
 			else
 			{
 				logger.info("Invocazione del servizio per la ricerca del familiare...");
-				return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca));
+				return ResponseEntity.ok().body(this.familiareService.getFamiliareByNumeroTelefonoCodiceFiscale(simpleRicerca));
 			}
+		}
+		
+		catch(SiapAfisMWException ex)
+		{
+			logger.info("Si e' verificata un'eccezione", ex);
+			
+			return ResponseEntity.status(ex.getStatus()).body(null);
 		}
 		
 		catch(Throwable ex)
@@ -119,7 +131,6 @@ public class FamiliareController
 			logger.info("Si e' verificata un'eccezione interna", ex);
 			logger.info("Preparazione risposta con codice 500...");
 			
-			ex.printStackTrace();
 			return ResponseEntity.internalServerError().body(null);
 		}	
 	}

@@ -18,6 +18,7 @@ import it.mgg.siapafismw.dto.AvailabilityDTO;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.Detenuto;
 
 @Service("detenutoServiceImpl")
@@ -29,7 +30,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	private static final Logger logger = LoggerFactory.getLogger(DetenutoServiceImpl.class);
 
 	@Override
-	public DetenutoDTO findDetenutoByMatricola(String matricola) 
+	public DetenutoDTO findDetenutoByMatricola(String matricola) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al servizio di ricerca del deteuto per matricola...");
 		return detenutoDAO.findDetenutoByMatricola(matricola);
@@ -55,7 +56,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	}
 
 	@Override
-	public List<DetenutoDTO> getDetenutiByNumeroTelefono(String numeroTelefono) 
+	public List<DetenutoDTO> getDetenutiByNumeroTelefono(String numeroTelefono) throws SiapAfisMWException 
 	{
 		/* ricerca dei detenuti */
 		List<Detenuto> listaDetenuti = this.detenutoDAO.getDetenutiByNumeroTelefono(numeroTelefono);
@@ -75,7 +76,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	}
 
 	@Override
-	public SlotDisponibileDTO getSlotDisponibili(String matricola) 
+	public SlotDisponibileDTO getSlotDisponibili(String matricola) throws SiapAfisMWException 
 	{
 		/* ricerca detenuto */
 		DetenutoDTO optDetenuto = detenutoDAO.findDetenutoByMatricola(matricola);
@@ -104,7 +105,7 @@ public class DetenutoServiceImpl implements DetenutoService
 	}
 
 	@Override
-	public List<DetenutoDTO> findDetenutiByCFNumeroTelefono(@RequestBody RicercaDTO ricerca) 
+	public List<DetenutoDTO> findDetenutiByCFNumeroTelefono(@RequestBody RicercaDTO ricerca) throws SiapAfisMWException 
 	{
 		/* ricerca detenuti nel DAO */
 		logger.info("Accesso al servizio per la ricerca del detenunto sulla base del codice fiscale o del numero di telefono");

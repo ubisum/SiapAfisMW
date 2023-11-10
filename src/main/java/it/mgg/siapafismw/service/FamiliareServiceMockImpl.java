@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
-import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 
 @Service("familiareServiceMockImpl")
 public class FamiliareServiceMockImpl implements FamiliareService 
@@ -22,7 +22,7 @@ public class FamiliareServiceMockImpl implements FamiliareService
 	}
 
 	@Override
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(RicercaDTO ricerca) 
+	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) 
 	{
 		logger.info("Accesso al servizio mock per la ricerca del familiare...");
 		logger.info("Creazione dell'oggeetto da restituire...");

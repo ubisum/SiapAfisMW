@@ -3,23 +3,21 @@ package it.mgg.siapafismw.dao;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
-import it.mgg.siapafismw.model.Allegato;
-import it.mgg.siapafismw.model.Detenuto;
+import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.DocumentoTMiddle;
 import it.mgg.siapafismw.model.DocumentoTMiddleId;
 import it.mgg.siapafismw.model.Familiare;
@@ -30,8 +28,6 @@ import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
 import it.mgg.siapafismw.model.SalvaFamiliareTracking;
 import it.mgg.siapafismw.model.SalvaFamiliareTrackingId;
 import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
-import it.mgg.siapafismw.repositories.AllegatoRepository;
-import it.mgg.siapafismw.repositories.DetenutoRepository;
 import it.mgg.siapafismw.repositories.DocumentoTMiddleRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.FamiliareTMiddleRepository;
@@ -40,6 +36,8 @@ import it.mgg.siapafismw.repositories.RelazioneParentelaTMiddleRepository;
 import it.mgg.siapafismw.repositories.SalvaFamiliareTrackingRepository;
 import it.mgg.siapafismw.repositories.TipoDocumentoTMiddleRepository;
 import it.mgg.siapafismw.utils.SiapAfisMWConstants;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Component
@@ -47,12 +45,6 @@ public class FamiliareDAOImpl implements FamiliareDAO
 {
 	@Autowired
 	private FamiliareRepository familiareRepository;
-	
-	@Autowired
-	private AllegatoRepository allegatoRepository;
-	
-	@Autowired
-	private DetenutoRepository detenutoRepository;
 	
 	@Autowired
 	private MatricolaTMiddleRepository matricolaRepository;
@@ -72,11 +64,14 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	@Autowired
 	private SalvaFamiliareTrackingRepository familiareTrackingRepository;
 	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	private static final Logger logger = LoggerFactory.getLogger(FamiliareDAOImpl.class);
 	
 	@Override
 	@Transactional
-	public void insertFamiliare(FamiliareDTO familiare, String matricola) 
+	public void insertFamiliare(FamiliareDTO familiare, String matricola) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al DAO per l'inserimento del familiare...");
 		
@@ -84,26 +79,26 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(familiare.getNome()))
 		{
 			logger.info("Nome del familiare on valido");
-			throw new IllegalArgumentException("Nome del familiare non valido");
+			throw new SiapAfisMWException("Nome del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(familiare.getCognome()))
 		{
 			logger.info("Cognome del familiare non valido");
-			throw new IllegalArgumentException("Cognome del familiare non valido");
+			throw new SiapAfisMWException("Cognome del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(familiare.getCodiceFiscale()))
 		{
 			logger.info("Codice fiscale del familiare non valido");
-			throw new IllegalArgumentException("Codice fiscale del familiare non valido");
+			throw new SiapAfisMWException("Codice fiscale del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* controllo e riceerca del tipo documennto */
 		if(StringUtils.isBlank(familiare.getDocumento()))
 		{
 			logger.info("Documento del familiare non valido");
-			throw new IllegalArgumentException("Documento del familiare non valido");
+			throw new SiapAfisMWException("Documento del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		logger.info("Ricerca tipo documento...");
@@ -113,33 +108,33 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(optTipoDocumento.isEmpty())
 		{
 			logger.info("Impossibile riconoscere il tipo di documento {}",familiare.getDocumento());
-			throw new IllegalArgumentException("Impossibile riconoscere il tipo di documento " + 
-		                                       familiare.getDocumento());
+			throw new SiapAfisMWException("Impossibile riconoscere il tipo di documento " + 
+		                                       familiare.getDocumento(), HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(familiare.getNumeroDocumento()))
 		{
 			logger.info("Numero documento del familiare non valido");
-			throw new IllegalArgumentException("Numero documento del familiare non valido");
+			throw new SiapAfisMWException("Numero documento del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(familiare.getTelefono()) || !familiare.getTelefono().matches("^[0-9]+$"))
 		{
 			logger.info("Telefono del familiare non valido");
-			throw new IllegalArgumentException("Telefono del familiare non valido");
+			throw new SiapAfisMWException("Telefono del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(familiare.getDataDocumento()))
 		{
 			logger.info("Data documento non valida");
-			throw new IllegalArgumentException("Data documento non valida");
+			throw new SiapAfisMWException("Data documento non valida", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* controllo e ricerca del grado familiare */
 		if(StringUtils.isBlank(familiare.getGradoParentela()))
 		{
 			logger.info("Grado parentela non presente");
-			throw new IllegalArgumentException("Grado parentela non presente");
+			throw new SiapAfisMWException("Grado parentela non presente", HttpStatus.BAD_REQUEST);
 		}
 		
 		logger.info("Ricerca del grado parentela...");
@@ -151,7 +146,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			if(optRelazione.isEmpty())
 			{
 				logger.info("Impossibile definire il grado di parentela per il familiare specificato");
-				throw new IllegalArgumentException("Impossibile definire il grado di parentela per il familiare specificato");
+				throw new SiapAfisMWException("Impossibile definire il grado di parentela per il familiare specificato", HttpStatus.BAD_REQUEST);
 			}
 		}
 		
@@ -163,7 +158,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(!familiare.getDataDocumento().matches(dateRegex))
 		{
 			logger.info("La data del documento non e' nel formato dd-MM-yyyy e/o contiene caratteri non validi");
-			throw new IllegalArgumentException("La data del documento non e' nel formato dd-MM-yyyy");
+			throw new SiapAfisMWException("La data del documento non e' nel formato dd-MM-yyyy", HttpStatus.BAD_REQUEST);
 		}
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -173,7 +168,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(StringUtils.isBlank(matricola))
 		{
 			logger.info("Matricola del detenuto non presente");
-			throw new IllegalArgumentException("Matricola del detenuto non presente");
+			throw new SiapAfisMWException("Matricola del detenuto non presente", HttpStatus.BAD_REQUEST);
 		}
 		
 		logger.info("Ricerca ID soggetto...");
@@ -181,7 +176,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(idSoggetto.isEmpty())
 		{
 			logger.info("Nessun detenuto presente con la matricola specificata");
-			throw new IllegalArgumentException("Nessun detenuto presente con la matricola specificata");
+			throw new SiapAfisMWException("Nessun detenuto presente con la matricola specificata", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* ricerca massimo progressivo familiare per l'id soggetto trovato */
@@ -250,85 +245,94 @@ public class FamiliareDAOImpl implements FamiliareDAO
 
 	}
 
-	private void salvaFamiliareLocalmente(FamiliareDTO familiare, String matricola) {
-		Optional<Detenuto> optDetenuto = this.detenutoRepository.findById(matricola);
-		if(optDetenuto.isEmpty())
-			throw new IllegalArgumentException("Nessun detenuto presente con la matricola fornita");
-		
-		/* salvataggio familiare */
-		ModelMapper mapper = new ModelMapper();
-		Familiare toDB = mapper.map(familiare, Familiare.class);
-		toDB.setListaAllegati(null);
-		toDB.setListaDetenuti(Arrays.asList(optDetenuto.get()));
-		
-		Familiare familiareSalvato = familiareRepository.save(toDB);
-		
-		/* controllo allegati */
-		if(CollectionUtils.isNotEmpty(familiare.getListaAllegati()))
-		{
-			List<String> listaNomi = new ArrayList<>();
-			for(AllegatoDTO allegato : familiare.getListaAllegati())
-			{
-				if(StringUtils.isNotBlank(allegato.getNomeFile()))
-					listaNomi.add(allegato.getNomeFile());
-				
-				else
-					throw new IllegalArgumentException("Il nome di uno degli allegati non e' presente");
-			}
-			
-			List<Allegato> allegatiPresenti = allegatoRepository.findByNomeFileIn(listaNomi);
-			if(CollectionUtils.isNotEmpty(allegatiPresenti))
-				throw new IllegalArgumentException("Uno o piu' allegati risultano registrati coi nomi forniti");
-			
-			/* aggiunta allegati */
-			for(AllegatoDTO allegato : familiare.getListaAllegati())
-			{
-				Allegato allegatoDaSalvare = mapper.map(allegato, Allegato.class);
-				allegatoDaSalvare.setFamiliare(familiareSalvato);
-				
-				allegatoRepository.save(allegatoDaSalvare);
-			}
-		}
-		
-		/* aggiornamento detenuto */
-		if(CollectionUtils.isEmpty(optDetenuto.get().getFamiliari()))
-			optDetenuto.get().setFamiliari(Arrays.asList(familiareSalvato));
-		
-		else
-			optDetenuto.get().getFamiliari().add(familiareSalvato);
-		
-		this.detenutoRepository.save(optDetenuto.get());
-	}
-
 	@Override
-	public Familiare getFamiliareByNumeroTelefono(String numeroTelefono) 
+	public Familiare getFamiliareByNumeroTelefono(String numeroTelefono) throws SiapAfisMWException 
 	{
 		/* controllo numero telefono */
 		if(StringUtils.isBlank(numeroTelefono))
-			throw new IllegalArgumentException("Telefono del familiare non valido");
+			throw new SiapAfisMWException("Telefono del familiare non valido", HttpStatus.BAD_REQUEST);
 		
 		/* ricerca familiare */
 		Optional<Familiare> optFamiliare = this.familiareRepository.findById(numeroTelefono);
 		if(optFamiliare.isEmpty())
-			throw new IllegalArgumentException("Nessun familiare con il telefono fornito");
+			throw new SiapAfisMWException("Nessun familiare con il telefono fornito", HttpStatus.NOT_FOUND);
 		
 		return optFamiliare.get();
 	}
 
 	@Override
-	public Familiare getFamiliareByCodiceFiscale(String codiceFiscale) 
+	public Familiare getFamiliareByCodiceFiscale(String codiceFiscale) throws SiapAfisMWException 
 	{
 		/* controllo numero telefono */
 		if(StringUtils.isBlank(codiceFiscale))
-			throw new IllegalArgumentException("Codice fiscale del familiare non valido");
+			throw new SiapAfisMWException("Codice fiscale del familiare non valido", HttpStatus.BAD_REQUEST);
 		
 		/* ricerca familiare */
 		Optional<Familiare> optFamiliare = this.familiareRepository.findByCodiceFiscale(codiceFiscale);
 		if(optFamiliare.isEmpty())
-			throw new IllegalArgumentException("Nessun familiare con il codice fiscale fornito");
+			throw new SiapAfisMWException("Nessun familiare con il codice fiscale fornito", HttpStatus.BAD_REQUEST);
 		
 		return optFamiliare.get();
 		
+	}
+
+	@Override
+	public Familiare getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException 
+	{
+		logger.info("Accesso alla funzione DAO per la ricerca del familiare sulla base del codice fiscale o del numero di telefono");
+		
+		if(StringUtils.isAllBlank(ricerca.getCodiceFiscaleFamiliare(), ricerca.getNumeroTelefonoFamiliare()))
+		{
+			logger.info("Fornire almeno uno tra codice fiscale e numero di telefono del familiare");
+			throw new SiapAfisMWException("Fornire almeno uno tra codice fiscale e numero di telefono del familiare", HttpStatus.BAD_REQUEST);
+		}
+		
+		logger.info("Preparazione query nativa...");
+		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.DESCRIZIONE  , md.M302_NUM_DOC , mr.DESCRIZIONEREL  "
+				+ "FROM GATEWAY.MDD301_FAMILIARE mf  "
+				+ "JOIN GATEWAY.MDC_RELPARENTELA mr ON mr.IDRELPARENTELA  = mf.M301_REL_PAR   "
+				+ "JOIN GATEWAY.MDD302_DOCUMENTO md ON mf.M301_PRG_FAM = md.M302_PRG_FAM AND MF.M301_ID_SOGG = md.M302_ID_SOGG  "
+				+ "JOIN GATEWAY.MDC_TIPODOCUMENTO mt ON md.M302_TIPO_DOC = MT.ID_TIPO_DOC  " 
+				+ "WHERE (mf.M301_DT_CANC IS NULL  AND md.M302_DT_CANC IS NULL) ";
+		
+		List<Object[]> listaRisultati = null;
+		
+		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
+		{
+			logger.info("Rilevato codice fiscale, si usera' questa informazione per la ricerca del familiare");
+			query += " AND mf.M301_COD_FISCALE = :codiceFiscale LIMIT 1";
+			
+			listaRisultati = entityManager.createNativeQuery(query).setParameter("codiceFiscale", 
+					         ricerca.getCodiceFiscaleFamiliare()).getResultList();
+		}
+		
+		else
+		{
+			logger.info("Rilevato numero di telefono, si usera' questa informazione per la ricerca del familiare");
+			query += " AND MF.M301_UTENZA = :utenza LIMIT 1";
+			
+			listaRisultati = entityManager.createNativeQuery(query).setParameter("utenza", 
+			         ricerca.getNumeroTelefonoFamiliare()).getResultList();
+		}
+		
+		if(CollectionUtils.isEmpty(listaRisultati))
+		{
+			logger.info("Nessun risultato trovato con le informazioni fornite");
+			throw new SiapAfisMWException("Nessun risultato trovato con le informazioni fornite", HttpStatus.NOT_FOUND);
+		}
+		
+		logger.info("Preparazione oggetto con informazioni familiare...");
+		Familiare familiare = new Familiare();
+		
+		familiare.setNome((String)listaRisultati.get(0)[0]);
+		familiare.setCognome((String)listaRisultati.get(0)[1]);
+		familiare.setTelefono((String)listaRisultati.get(0)[2]);
+		familiare.setCodiceFiscale((String)listaRisultati.get(0)[3]);
+		familiare.setDocumento((String)listaRisultati.get(0)[4]);
+		familiare.setNumeroDocumento((String)listaRisultati.get(0)[5]);
+		familiare.setGradoParentela((String)listaRisultati.get(0)[6]);
+		
+		return familiare;
 	}
 
 }

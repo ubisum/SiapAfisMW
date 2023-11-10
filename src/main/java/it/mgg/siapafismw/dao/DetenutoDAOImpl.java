@@ -9,17 +9,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.Detenuto;
 import it.mgg.siapafismw.model.Familiare;
 import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.repositories.DetenutoRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
-import it.mgg.siapafismw.service.DetenutoServiceImpl;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -41,13 +42,13 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	private static final Logger logger = LoggerFactory.getLogger(DetenutoDAOImpl.class);
 	
 	@Override
-	public DetenutoDTO findDetenutoByMatricola(String matricola) 
+	public DetenutoDTO findDetenutoByMatricola(String matricola) throws SiapAfisMWException 
 	{
 		/* controllo presenza matricola */
 		if(StringUtils.isBlank(matricola))
 		{
 			logger.info("Il valore della matricola fornito non e' valido");
-			throw new IllegalArgumentException("Il valore della matricola fornito non e' valido");
+			throw new SiapAfisMWException("Il valore della matricola fornito non e' valido", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* esecuzione query */
@@ -95,7 +96,7 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		if(CollectionUtils.isEmpty(listaRisultati))
 		{
 			logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
-			throw new IllegalStateException("Nessun detenuto trovato con la matricola fornita");
+			throw new SiapAfisMWException("Nessun detenuto trovato con la matricola fornita", HttpStatus.NOT_FOUND);
 		}
 		
 		logger.info("Numero risultati trovati: {}", listaRisultati.size());
@@ -139,22 +140,22 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	}
 
 	@Override
-	public List<Detenuto> getDetenutiByNumeroTelefono(String numeroTelefono) 
+	public List<Detenuto> getDetenutiByNumeroTelefono(String numeroTelefono) throws SiapAfisMWException 
 	{
 		/* controlli input */
 		if(StringUtils.isBlank(numeroTelefono))
-			throw new IllegalArgumentException("Il numero di telefono fornito non e' valido");
+			throw new SiapAfisMWException("Il numero di telefono fornito non e' valido", HttpStatus.BAD_REQUEST);
 		
 		/* ricerca detenuto */
 		Optional<Familiare> familiare = familiareRepository.findById(numeroTelefono);
 		if(familiare.isEmpty())
-			throw new IllegalArgumentException("Nessun familiare trovato con il numero di telefono specificato");
+			throw new SiapAfisMWException("Nessun familiare trovato con il numero di telefono specificato", HttpStatus.BAD_REQUEST);
 		
 		return familiare.get().getListaDetenuti();
 	}
 
 	@Override
-	public List<Detenuto> findDetenutiByCFNumeroTelefono(RicercaDTO ricerca) 
+	public List<Detenuto> findDetenutiByCFNumeroTelefono(RicercaDTO ricerca) throws SiapAfisMWException 
 	{
 		logger.info("Accesso alla funzione DAO per la ricerca dei detenuti in base al CF "
 				  + "od al numero telefonico del familiare...");
@@ -163,14 +164,14 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		if(ricerca == null)
 		{
 			logger.info("DTO di ricerca non presente");
-			throw new IllegalArgumentException("DTO di ricerca non presente");
+			throw new SiapAfisMWException("DTO di ricerca non presente", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(StringUtils.isBlank(ricerca.getCodiceFiscaleFamiliare()) && 
 		   StringUtils.isBlank(ricerca.getNumeroTelefonoFamiliare()))
 		{
 			logger.info("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare");
-			throw new IllegalArgumentException("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare");
+			throw new SiapAfisMWException("Impossibile effettuare la ricerca: fornire uno tra codice fiscale e numero di telefono del familiare", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* definizione query */
@@ -280,11 +281,11 @@ public class DetenutoDAOImpl implements DetenutoDAO
 	}
 
 	@Override
-	public Integer findIdSoggettoFromMatricola(String matricola) 
+	public Integer findIdSoggettoFromMatricola(String matricola) throws SiapAfisMWException 
 	{
 		/* controllo matricola */
 		if(StringUtils.isBlank(matricola))
-			throw new IllegalArgumentException("Matricola detenuto non valido");
+			throw new SiapAfisMWException("Matricola detenuto non valido", HttpStatus.BAD_REQUEST);
 		
 		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
 		

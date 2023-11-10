@@ -13,17 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.mgg.siapafismw.dao.FamiliareDAOImpl;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
-import it.mgg.siapafismw.dto.SlotDisponibileDTO;
+import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.service.DetenutoService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -42,7 +40,6 @@ public class DetenutoController
 	@Value("${siapafismw.mock}")
 	private String mockValue;
 	
-	private final String INTERNAL_SERVER_ERROR = "Si e' verificato un errore interno";
 	private static final Logger logger = LoggerFactory.getLogger(DetenutoController.class);
 	
 	@GetMapping("/GetInfoDetenuto")
@@ -52,30 +49,52 @@ public class DetenutoController
 		
 		/* invocazione del service per ricerca detenuto */
 		DetenutoDTO detenuto = null;
-		if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+		
+		try
 		{
-			logger.info("Invocazione del servizio mock per la ricerca delle informazioni del detenuto...");
-			detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
+			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			{
+				logger.info("Invocazione del servizio mock per la ricerca delle informazioni del detenuto...");
+				detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
+			}
+			
+			
+			else
+			{
+				logger.info("Invocazione del servizio per la ricerca delle informazioni del detenuto...");
+				detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
+			}
+			
+			if(detenuto != null)
+			{
+				logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
+				return ResponseEntity.ok(detenuto);
+			}
+			
+			else
+			{
+				logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
+				return ResponseEntity.notFound().build();
+			}
+		}
+		
+		catch(SiapAfisMWException ex)
+		{
+			logger.info("Si e' verificata un'eccezione", ex);
+			
+			return ResponseEntity.status(ex.getStatus()).body(null);
+		}
+		
+		catch(Throwable ex)
+		{
+			logger.info("Si e' verificata un'eccezione interna", ex);
+			logger.info("Preparazione risposta con codice 500...");
+			
+			return ResponseEntity.internalServerError().body(null);
 		}
 		
 		
-		else
-		{
-			logger.info("Invocazione del servizio per la ricerca delle informazioni del detenuto...");
-			detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
-		}
 		
-		if(detenuto != null)
-		{
-			logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
-			return ResponseEntity.ok(detenuto);
-		}
-		
-		else
-		{
-			logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
-			return ResponseEntity.notFound().build();
-		}
 	}
 	
 	@GetMapping("/GetListaDetenuti")
@@ -107,9 +126,18 @@ public class DetenutoController
 			return ResponseEntity.ok(listaDetenuti);
 		}
 		
+		catch(SiapAfisMWException ex)
+		{
+			logger.info("Si e' verificata un'eccezione", ex);
+			
+			return ResponseEntity.status(ex.getStatus()).body(null);
+		}
+		
 		catch(Throwable ex)
 		{
-			ex.printStackTrace();
+			logger.info("Si e' verificata un'eccezione interna", ex);
+			logger.info("Preparazione risposta con codice 500...");
+			
 			return ResponseEntity.internalServerError().body(null);
 		}
 	}
