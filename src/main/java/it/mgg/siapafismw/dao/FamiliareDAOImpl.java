@@ -281,7 +281,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	{
 		logger.info("Accesso alla funzione DAO per la ricerca del familiare sulla base del codice fiscale o del numero di telefono");
 		
-		if(StringUtils.isAllBlank(ricerca.getCodiceFiscaleFamiliare(), ricerca.getNumeroTelefonoFamiliare()))
+		if(StringUtils.isAllBlank(ricerca.getCodiceFiscale(), ricerca.getNumeroTelefono()))
 		{
 			logger.info("Fornire almeno uno tra codice fiscale e numero di telefono del familiare");
 			throw new SiapAfisMWException("Fornire almeno uno tra codice fiscale e numero di telefono del familiare", HttpStatus.BAD_REQUEST);
@@ -297,13 +297,13 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		
 		List<Object[]> listaRisultati = null;
 		
-		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
+		if(StringUtils.isNotBlank(ricerca.getCodiceFiscale()))
 		{
 			logger.info("Rilevato codice fiscale, si usera' questa informazione per la ricerca del familiare");
 			query += " AND mf.M301_COD_FISCALE = :codiceFiscale LIMIT 1";
 			
 			listaRisultati = entityManager.createNativeQuery(query).setParameter("codiceFiscale", 
-					         ricerca.getCodiceFiscaleFamiliare()).getResultList();
+					         ricerca.getCodiceFiscale()).getResultList();
 		}
 		
 		else
@@ -312,7 +312,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			query += " AND MF.M301_UTENZA = :utenza LIMIT 1";
 			
 			listaRisultati = entityManager.createNativeQuery(query).setParameter("utenza", 
-			         ricerca.getNumeroTelefonoFamiliare()).getResultList();
+			         ricerca.getNumeroTelefono()).getResultList();
 		}
 		
 		if(CollectionUtils.isEmpty(listaRisultati))

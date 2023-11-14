@@ -38,8 +38,8 @@ public class FamiliareServiceImpl implements FamiliareService
 	{
 		logger.info("Accesso al servizio per la ricerca del familiare...");
 		
-		if(ricerca == null || (StringUtils.isBlank(ricerca.getCodiceFiscaleFamiliare()) && 
-		   StringUtils.isBlank(ricerca.getNumeroTelefonoFamiliare())))
+		if(ricerca == null || (StringUtils.isBlank(ricerca.getCodiceFiscale()) && 
+		   StringUtils.isBlank(ricerca.getNumeroTelefono())))
 		{
 			logger.info("Fornire almeno uno tra codice fiscale e numero di "
 					+ " telefono del familiare");

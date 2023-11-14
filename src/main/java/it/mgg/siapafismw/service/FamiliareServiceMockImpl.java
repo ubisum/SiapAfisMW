@@ -41,9 +41,9 @@ public class FamiliareServiceMockImpl implements FamiliareService
 		AllegatoDTO allegato1 = new AllegatoDTO("patente.jpg", "JPG");
 		AllegatoDTO allegato2 = new AllegatoDTO("codice_fiscale.pdf", "PDF");
 		
-		familiare.setListaAllegati(new ArrayList<>());
-		familiare.getListaAllegati().add(allegato1);
-		familiare.getListaAllegati().add(allegato2);
+		familiare.setAllegati(new ArrayList<>());
+		familiare.getAllegati().add(allegato1);
+		familiare.getAllegati().add(allegato2);
 		
 		modelDTO.setFamiliareModel(familiare);
 		

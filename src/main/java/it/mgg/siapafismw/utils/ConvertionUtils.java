@@ -37,7 +37,7 @@ public class ConvertionUtils
 				listaDTO.add(dto);
 			}
 			
-			familiareDTO.setListaAllegati(listaDTO);
+			familiareDTO.setAllegati(listaDTO);
 		}
 		
 		return familiareDTO;

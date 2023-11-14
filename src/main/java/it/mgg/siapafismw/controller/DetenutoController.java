@@ -1,6 +1,7 @@
 package it.mgg.siapafismw.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.mgg.siapafismw.dto.DetenutoDTO;
+import it.mgg.siapafismw.dto.GetListaDetenutiDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
@@ -98,7 +100,7 @@ public class DetenutoController
 	}
 	
 	@GetMapping("/GetListaDetenuti")
-	public ResponseEntity<List<DetenutoDTO>> getListaDetenuti(@RequestBody SimpleRicercaDTO simpleRicerca)
+	public ResponseEntity<List<GetListaDetenutiDTO>> getListaDetenuti(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
 		logger.info("Accesso all'endpoint GetListaDetenuti");
 		
@@ -123,7 +125,8 @@ public class DetenutoController
 				listaDetenuti = this.detenutoService.findDetenutiByCFNumeroTelefono(ricerca);
 			}
 			
-			return ResponseEntity.ok(listaDetenuti);
+			return ResponseEntity.ok(listaDetenuti.stream()
+				   .map(det -> mapper.map(det, GetListaDetenutiDTO.class)).collect(Collectors.toList()));
 		}
 		
 		catch(SiapAfisMWException ex)

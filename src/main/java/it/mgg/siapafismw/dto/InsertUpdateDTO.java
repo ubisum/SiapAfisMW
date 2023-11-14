@@ -5,10 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class SimpleRicercaDTO 
+@AllArgsConstructor
+public class InsertUpdateDTO 
 {
-	private String numeroTelefono;
-	private String codiceFiscale;
+	private String id;
 }
