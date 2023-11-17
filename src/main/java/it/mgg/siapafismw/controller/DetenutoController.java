@@ -3,6 +3,7 @@ package it.mgg.siapafismw.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import it.mgg.siapafismw.utils.ConvertionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -111,8 +112,8 @@ public class DetenutoController
 			
 			logger.info("Mapping dei dati in ingresso...");
 			ModelMapper mapper = new ModelMapper();
-			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
-			
+			RicercaDTO ricerca = ConvertionUtils.convertSimpleRicercaDTOtoRicercaDTO(simpleRicerca);
+
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{
 				logger.info("Invocazione servizio mock per ricerca lista detenuti di un familiare...");
