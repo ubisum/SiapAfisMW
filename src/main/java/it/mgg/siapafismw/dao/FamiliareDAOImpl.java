@@ -199,6 +199,8 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		familiareTM.setCodiceFiscale(familiare.getCodiceFiscale());
 		familiareTM.setRelazioneParentela(optRelazione.get().getIdParentela());
 		familiareTM.setUtenza(familiare.getTelefono());
+		familiareTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+		familiareTM.setDataInserimento(LocalDateTime.now());
 		
 		this.familiareTMiddleRepository.save(familiareTM);
 		
@@ -219,8 +221,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		this.documentoTMiddleRepository.save(documentoTM);
 		
 		logger.info("Effettuata operazione SAVE del documento");
-		
-		logger.info("Preparazione record per tabella di tracking...");
+		/*
+		 * 
+		 * logger.info("Preparazione record per tabella di tracking...");
 		SalvaFamiliareTracking tracking = new SalvaFamiliareTracking();
 		tracking.setSalvaFamiliareTrackigId(new SalvaFamiliareTrackingId(
 				                            idSoggetto.get().getIdSoggetto(), 
@@ -239,6 +242,10 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		tracking.setDataInserimento(LocalDateTime.now());
 		
 		this.familiareTrackingRepository.save(tracking);
+		 * 
+		 * 
+		 */
+		
 		
 		logger.info("Effettuata operazione SAVE dei dati di tracking");
 		logger.info("Fine metodo DAO per inserimento familiare");

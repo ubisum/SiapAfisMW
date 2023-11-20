@@ -34,7 +34,7 @@ public class FamiliareServiceImpl implements FamiliareService
 	}
 
 	@Override
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException 
+	public FamiliareDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al servizio per la ricerca del familiare...");
 		
@@ -53,12 +53,13 @@ public class FamiliareServiceImpl implements FamiliareService
 		
 		/* ricerca familiare */
 		Familiare familiare = familiareDAO.getFamiliareByNumeroTelefonoCodiceFiscale(ricerca);
+		FamiliareDTO familiareDTO = new FamiliareDTO();
 		
 		/* conversione */
 		if(familiare != null)
 		{
 			logger.info("Trovato familiare. Inizio operazione di coversione dell'entita' in DTO...");
-			FamiliareDTO familiareDTO = ConvertionUtils.convertFamiliare2DTO(familiare);
+			 familiareDTO = ConvertionUtils.convertFamiliare2DTO(familiare);
 			model.setFamiliareModel(familiareDTO);
 			
 			logger.info("Fine operazione di conversione");
@@ -66,7 +67,7 @@ public class FamiliareServiceImpl implements FamiliareService
 		
 		logger.info("Fine del servizio per la ricerca del familiare");
 		
-		return model;
+		return familiareDTO;
 		
 	}
 	

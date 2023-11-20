@@ -19,5 +19,6 @@ public class FamiliareDTO
 	private String numeroDocumento;
 	private String dataDocumento;
 	private String gradoParentela;
+	private String matricolaDetenutoAssociato;
 	private List<AllegatoDTO> allegati;
 }
