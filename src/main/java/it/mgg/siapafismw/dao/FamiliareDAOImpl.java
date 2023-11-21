@@ -1,5 +1,8 @@
 package it.mgg.siapafismw.dao;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -295,7 +298,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		logger.info("Preparazione query nativa...");
-		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.DESCRIZIONE  , md.M302_NUM_DOC , mr.DESCRIZIONEREL  "
+		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.DESCRIZIONE  , md.M302_NUM_DOC , mr.DESCRIZIONEREL , MD.M302_DT_DOC "
 				+ "FROM GATEWAY.MDD301_FAMILIARE mf  "
 				+ "JOIN GATEWAY.MDC_RELPARENTELA mr ON mr.IDRELPARENTELA  = mf.M301_REL_PAR   "
 				+ "JOIN GATEWAY.MDD302_DOCUMENTO md ON mf.M301_PRG_FAM = md.M302_PRG_FAM AND MF.M301_ID_SOGG = md.M302_ID_SOGG  "
@@ -322,14 +325,26 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			         ricerca.getNumeroTelefono()).getResultList();
 		}
 		
-		if(CollectionUtils.isEmpty(listaRisultati))
-		{
-			logger.info("Nessun risultato trovato con le informazioni fornite");
-			throw new SiapAfisMWException("Nessun risultato trovato con le informazioni fornite", HttpStatus.NOT_FOUND);
-		}
+		// if(CollectionUtils.isEmpty(listaRisultati))
+		// {
+		// 	logger.info("Nessun risultato trovato con le informazioni fornite");
+		// 	throw new SiapAfisMWException("Nessun risultato trovato con le informazioni fornite", HttpStatus.NOT_FOUND);
+		// }
 		
 		logger.info("Preparazione oggetto con informazioni familiare...");
 		Familiare familiare = new Familiare();
+
+		String pattern = "YYYY-MM-dd";
+		String dataDoc = null;
+		DateFormat simplDateFormat = new SimpleDateFormat(pattern);
+
+
+		if(listaRisultati.get(0)[7] != null)
+        {
+			Date x = (Date)(listaRisultati.get(0)[7]);
+	    dataDoc = simplDateFormat.format(x);
+	           }
+
 		
 		familiare.setNome((String)listaRisultati.get(0)[0]);
 		familiare.setCognome((String)listaRisultati.get(0)[1]);
@@ -338,6 +353,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		familiare.setDocumento((String)listaRisultati.get(0)[4]);
 		familiare.setNumeroDocumento((String)listaRisultati.get(0)[5]);
 		familiare.setGradoParentela((String)listaRisultati.get(0)[6]);
+		familiare.setDataDocumento(dataDoc);
 		
 		return familiare;
 	}

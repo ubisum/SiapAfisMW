@@ -68,17 +68,17 @@ public class DetenutoController
 				detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 			}
 			
-			if(detenuto != null)
-			{
+			// if(detenuto != null)
+			// {
 				logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
 				return ResponseEntity.ok(detenuto);
-			}
+			// }
 			
-			else
-			{
-				logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
-				return ResponseEntity.notFound().build();
-			}
+			// else
+			// {
+			// 	logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
+			// 	return ResponseEntity.notFound().build();
+			// }
 		}
 		
 		catch(SiapAfisMWException ex)
