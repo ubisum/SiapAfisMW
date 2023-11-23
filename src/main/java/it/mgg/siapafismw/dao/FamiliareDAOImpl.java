@@ -325,11 +325,12 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			         ricerca.getNumeroTelefono()).getResultList();
 		}
 		
-		// if(CollectionUtils.isEmpty(listaRisultati))
-		// {
-		// 	logger.info("Nessun risultato trovato con le informazioni fornite");
-		// 	throw new SiapAfisMWException("Nessun risultato trovato con le informazioni fornite", HttpStatus.NOT_FOUND);
-		// }
+		if(CollectionUtils.isEmpty(listaRisultati))
+		{
+			logger.info("Nessun risultato trovato con le informazioni fornite");
+			//throw new SiapAfisMWException("Nessun risultato trovato con le informazioni fornite", HttpStatus.NOT_FOUND);
+			return null;
+		} 
 		
 		logger.info("Preparazione oggetto con informazioni familiare...");
 		Familiare familiare = new Familiare();
@@ -342,7 +343,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		if(listaRisultati.get(0)[7] != null)
         {
 			Date x = (Date)(listaRisultati.get(0)[7]);
-	    dataDoc = simplDateFormat.format(x);
+	        dataDoc = simplDateFormat.format(x);
 	           }
 
 		

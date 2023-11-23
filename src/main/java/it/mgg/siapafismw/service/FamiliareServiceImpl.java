@@ -64,6 +64,8 @@ public class FamiliareServiceImpl implements FamiliareService
 			
 			logger.info("Fine operazione di conversione");
 		}
+		else
+		return null;
 		
 		logger.info("Fine del servizio per la ricerca del familiare");
 		
