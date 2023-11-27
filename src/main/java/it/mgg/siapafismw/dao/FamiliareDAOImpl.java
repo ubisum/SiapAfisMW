@@ -32,14 +32,13 @@ import it.mgg.siapafismw.model.FamiliareTMiddleId;
 import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
 import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
-import it.mgg.siapafismw.repositories.AutorizzazioneTMiddleRepository;
 import it.mgg.siapafismw.repositories.AutorizzazioneFamiliareTMiddleRepository;
+import it.mgg.siapafismw.repositories.AutorizzazioneTMiddleRepository;
 import it.mgg.siapafismw.repositories.DocumentoTMiddleRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.FamiliareTMiddleRepository;
 import it.mgg.siapafismw.repositories.MatricolaTMiddleRepository;
 import it.mgg.siapafismw.repositories.RelazioneParentelaTMiddleRepository;
-import it.mgg.siapafismw.repositories.SalvaFamiliareTrackingRepository;
 import it.mgg.siapafismw.repositories.TipoDocumentoTMiddleRepository;
 import it.mgg.siapafismw.utils.SiapAfisMWConstants;
 import jakarta.persistence.EntityManager;
@@ -261,6 +260,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		Integer nextProgressivoAutorizzazione = this.autorizzazioneTMiddleRepository.findMaxPrgByMatricola(matricola);
 		if(nextProgressivoAutorizzazione == null)
 			nextProgressivoAutorizzazione = 1;
+		
+		else
+			nextProgressivoAutorizzazione++;
 		
 		logger.info("Prossimo progressivo: {}. Preparazione oggetto per salvataggio sul DB... ", nextProgressivoAutorizzazione);
 		AutorizzazioneTMiddleId autorizzazioneId = new AutorizzazioneTMiddleId(matricola, nextProgressivoAutorizzazione);
