@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import it.mgg.siapafismw.dao.FamiliareDAO;
+import it.mgg.siapafismw.dao.TrackingDAO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.enums.EsitoTracking;
+import it.mgg.siapafismw.enums.TrackingOperation;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.Familiare;
 import it.mgg.siapafismw.utils.ConvertionUtils;
@@ -19,6 +22,9 @@ public class FamiliareServiceImpl implements FamiliareService
 {
 	@Autowired
 	private FamiliareDAO familiareDAO;
+	
+	@Autowired
+	private TrackingDAO trackingDAO;
 	
 	private static final Logger logger = LoggerFactory.getLogger(FamiliareServiceImpl.class);
 	
@@ -63,6 +69,10 @@ public class FamiliareServiceImpl implements FamiliareService
 			
 			logger.info("Fine operazione di conversione");
 		}
+		
+		/* tracking */
+		this.trackingDAO.storeTracking(TrackingOperation.GET_FAMILIARE, ricerca, EsitoTracking.OK);
+		
 		
 		logger.info("Fine del servizio per la ricerca del familiare");
 		

@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import it.mgg.siapafismw.dto.FamiliareDTO;
-import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.DocumentoTMiddle;

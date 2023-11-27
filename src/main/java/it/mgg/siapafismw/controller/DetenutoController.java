@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -108,10 +109,12 @@ public class DetenutoController
 		{
 			/* ricerca dei detenuti */
 			List<DetenutoDTO> listaDetenuti = null;
+			ModelMapper mapper = new ModelMapper();
 			
 			logger.info("Mapping dei dati in ingresso...");
-			ModelMapper mapper = new ModelMapper();
-			RicercaDTO ricerca = mapper.map(simpleRicerca, RicercaDTO.class);
+			RicercaDTO ricerca = new RicercaDTO();
+			ricerca.setCodiceFiscaleFamiliare(simpleRicerca.getCodiceFiscale());
+			ricerca.setNumeroTelefonoFamiliare(simpleRicerca.getNumeroTelefono());
 			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{

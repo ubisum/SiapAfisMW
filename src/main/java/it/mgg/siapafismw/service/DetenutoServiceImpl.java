@@ -14,10 +14,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import it.mgg.siapafismw.dao.DetenutoDAO;
+import it.mgg.siapafismw.dao.TrackingDAO;
 import it.mgg.siapafismw.dto.AvailabilityDTO;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
+import it.mgg.siapafismw.enums.EsitoTracking;
+import it.mgg.siapafismw.enums.TrackingOperation;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.Detenuto;
 
@@ -26,6 +30,9 @@ public class DetenutoServiceImpl implements DetenutoService
 {
 	@Autowired
 	private DetenutoDAO detenutoDAO;
+	
+	@Autowired
+	private TrackingDAO trackingDAO;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DetenutoServiceImpl.class);
 
@@ -126,6 +133,11 @@ public class DetenutoServiceImpl implements DetenutoService
 		
 		else
 			logger.info("Nessun detenuto trovato");
+		
+		/* tracking */
+		this.trackingDAO.storeTracking(TrackingOperation.GET_LISTA_DETENUTI, 
+				                       new SimpleRicercaDTO(ricerca.getNumeroTelefonoFamiliare(), ricerca.getCodiceFiscaleFamiliare()), EsitoTracking.OK);
+		
 		
 		return listaDTO;
 	}
