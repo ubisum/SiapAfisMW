@@ -135,9 +135,9 @@ public class DetenutoServiceImpl implements DetenutoService
 			logger.info("Nessun detenuto trovato");
 		
 		/* tracking */
-		this.trackingDAO.storeTracking(TrackingOperation.GET_LISTA_DETENUTI, 
-				                       new SimpleRicercaDTO(ricerca.getNumeroTelefonoFamiliare(), ricerca.getCodiceFiscaleFamiliare()), EsitoTracking.OK);
-		
+//		this.trackingDAO.storeTracking(TrackingOperation.GET_LISTA_DETENUTI, 
+//				                       new SimpleRicercaDTO(ricerca.getNumeroTelefonoFamiliare(), ricerca.getCodiceFiscaleFamiliare()), EsitoTracking.OK);
+//		
 		
 		return listaDTO;
 	}

@@ -20,6 +20,10 @@ import org.springframework.stereotype.Component;
 import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
+import it.mgg.siapafismw.model.AutorizzazioneFamiliareTMiddle;
+import it.mgg.siapafismw.model.AutorizzazioneFamiliareTMiddleId;
+import it.mgg.siapafismw.model.AutorizzazioneTMiddle;
+import it.mgg.siapafismw.model.AutorizzazioneTMiddleId;
 import it.mgg.siapafismw.model.DocumentoTMiddle;
 import it.mgg.siapafismw.model.DocumentoTMiddleId;
 import it.mgg.siapafismw.model.Familiare;
@@ -27,9 +31,9 @@ import it.mgg.siapafismw.model.FamiliareTMiddle;
 import it.mgg.siapafismw.model.FamiliareTMiddleId;
 import it.mgg.siapafismw.model.MatricolaTMiddle;
 import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
-import it.mgg.siapafismw.model.SalvaFamiliareTracking;
-import it.mgg.siapafismw.model.SalvaFamiliareTrackingId;
 import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
+import it.mgg.siapafismw.repositories.AutorizzazioneTMiddleRepository;
+import it.mgg.siapafismw.repositories.AutorizzazioneFamiliareTMiddleRepository;
 import it.mgg.siapafismw.repositories.DocumentoTMiddleRepository;
 import it.mgg.siapafismw.repositories.FamiliareRepository;
 import it.mgg.siapafismw.repositories.FamiliareTMiddleRepository;
@@ -64,7 +68,10 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	private TipoDocumentoTMiddleRepository tipoDocumentoTMiddleRepository;
 	
 	@Autowired
-	private SalvaFamiliareTrackingRepository familiareTrackingRepository;
+	private AutorizzazioneTMiddleRepository autorizzazioneTMiddleRepository;
+	
+	@Autowired
+	private AutorizzazioneFamiliareTMiddleRepository autorizzazioneFamiliareTMiddleRepository;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -249,7 +256,39 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		 */
 		
 		
-		logger.info("Effettuata operazione SAVE dei dati di tracking");
+		logger.info("Inizio inserimento autorizzazione...");
+		logger.info("Ricerca progressivo per tabella MDD304_AUTORIZZ...");
+		Integer nextProgressivoAutorizzazione = this.autorizzazioneTMiddleRepository.findMaxPrgByMatricola(matricola);
+		if(nextProgressivoAutorizzazione == null)
+			nextProgressivoAutorizzazione = 1;
+		
+		logger.info("Prossimo progressivo: {}. Preparazione oggetto per salvataggio sul DB... ", nextProgressivoAutorizzazione);
+		AutorizzazioneTMiddleId autorizzazioneId = new AutorizzazioneTMiddleId(matricola, nextProgressivoAutorizzazione);
+		AutorizzazioneTMiddle autorizzazione = new AutorizzazioneTMiddle();
+		autorizzazione.setAutorizzazioneTMiddleId(autorizzazioneId);
+		autorizzazione.setFunzione(SiapAfisMWConstants.FUNZIONE_COLLOQUIO);
+		autorizzazione.setTipo(SiapAfisMWConstants.TIPO_AUTORIZZAZIONE_PERMANENTE);
+		autorizzazione.setData(LocalDate.now());
+		autorizzazione.setDirAutor(SiapAfisMWConstants.DIR_AUTOR_DIRETTORE);
+		autorizzazione.setIdSoggetto(idSoggetto.get().getIdSoggetto());
+		autorizzazione.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+		autorizzazione.setDataInserimento(LocalDateTime.now());
+		autorizzazione.setStato(SiapAfisMWConstants.STATO_AUTORIZZAZIONE_VALIDA);
+		
+		this.autorizzazioneTMiddleRepository.save(autorizzazione);
+		
+		logger.info("Preparazione oggetto per salvataggio autorizzazione familiare...");
+		AutorizzazioneFamiliareTMiddleId familiareId = new AutorizzazioneFamiliareTMiddleId(matricola, 
+				                                       nextProgressivoAutorizzazione, 
+				                      maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
+		
+		AutorizzazioneFamiliareTMiddle autorizazioneFamiliare = new AutorizzazioneFamiliareTMiddle();
+		autorizazioneFamiliare.setAutorizzazioneFamiliareTMiddleId(familiareId);
+		autorizazioneFamiliare.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+		autorizazioneFamiliare.setDataInserimento(LocalDateTime.now());
+		
+		this.autorizzazioneFamiliareTMiddleRepository.save(autorizazioneFamiliare);
+		
 		logger.info("Fine metodo DAO per inserimento familiare");
 
 	}
