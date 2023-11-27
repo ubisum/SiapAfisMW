@@ -1,5 +1,7 @@
 package it.mgg.siapafismw.controller;
 
+import javax.print.DocFlavor.STRING;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +22,8 @@ import it.mgg.siapafismw.dao.FamiliareDAOImpl;
 import it.mgg.siapafismw.dto.EsitoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
-import it.mgg.siapafismw.service.FamiliareModelDTO;
 import it.mgg.siapafismw.service.FamiliareService;
+import it.mgg.siapafismw.dto.FamiliareDTO;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -43,9 +45,8 @@ public class FamiliareController
 	private static final Logger logger = LoggerFactory.getLogger(FamiliareDAOImpl.class);
 
 	
-	@PostMapping("/SalvaFamiliare/{matricola}")
-	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareModelDTO familiare, 
-			                                       @PathVariable String matricola)
+	@PostMapping("/SalvaFamiliare")
+	public ResponseEntity<EsitoDTO> salvaFamiliare(@RequestBody FamiliareDTO familiare)
 	{
 		logger.info("Accesso all'endpoint SalvaFamiliare");
 		
@@ -54,16 +55,19 @@ public class FamiliareController
 		
 		try
 		{
+
+			String matricola = familiare.getMatricolaDetenutoAssociato();
+
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{
 				logger.info("Invocazione del servizio mock per l'inserimento del familiare...");
-				familiareServiceMock.insertFamiliare(familiare.getFamiliareModel(), matricola);
+				familiareServiceMock.insertFamiliare(familiare, matricola);
 			}
 			
 			else
 			{
 				logger.info("Invocazione del servizio per l'inserimento del familiare...");
-				familiareService.insertFamiliare(familiare.getFamiliareModel(), matricola);
+				familiareService.insertFamiliare(familiare, matricola);
 			}
 			
 			esito.setResponseCode("200");
@@ -97,7 +101,7 @@ public class FamiliareController
 	}
 	
 	@GetMapping("/GetFamiliare")
-	public ResponseEntity<FamiliareModelDTO> getFamiliare(@RequestBody SimpleRicercaDTO simpleRicerca)
+	public ResponseEntity<FamiliareDTO> getFamiliare(@RequestBody SimpleRicercaDTO simpleRicerca)
 	{
 		logger.info("Accesso all'endpoint GetFamiliare");
 		

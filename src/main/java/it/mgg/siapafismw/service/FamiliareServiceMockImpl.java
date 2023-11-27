@@ -22,7 +22,7 @@ public class FamiliareServiceMockImpl implements FamiliareService
 	}
 
 	@Override
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) 
+	public FamiliareDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) 
 	{
 		logger.info("Accesso al servizio mock per la ricerca del familiare...");
 		logger.info("Creazione dell'oggeetto da restituire...");
@@ -49,7 +49,7 @@ public class FamiliareServiceMockImpl implements FamiliareService
 		
 		logger.info("Fine creazione dell'oggetto");
 		
-		return modelDTO;
+		return familiare;
 	}
 
 }

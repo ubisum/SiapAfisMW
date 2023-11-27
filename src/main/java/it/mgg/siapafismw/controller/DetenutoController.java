@@ -3,6 +3,7 @@ package it.mgg.siapafismw.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import it.mgg.siapafismw.utils.ConvertionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -68,17 +69,17 @@ public class DetenutoController
 				detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
 			}
 			
-			if(detenuto != null)
-			{
+			// if(detenuto != null)
+			// {
 				logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
 				return ResponseEntity.ok(detenuto);
-			}
+			// }
 			
-			else
-			{
-				logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
-				return ResponseEntity.notFound().build();
-			}
+			// else
+			// {
+			// 	logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
+			// 	return ResponseEntity.notFound().build();
+			// }
 		}
 		
 		catch(SiapAfisMWException ex)
@@ -109,13 +110,11 @@ public class DetenutoController
 		{
 			/* ricerca dei detenuti */
 			List<DetenutoDTO> listaDetenuti = null;
-			ModelMapper mapper = new ModelMapper();
 			
 			logger.info("Mapping dei dati in ingresso...");
-			RicercaDTO ricerca = new RicercaDTO();
-			ricerca.setCodiceFiscaleFamiliare(simpleRicerca.getCodiceFiscale());
-			ricerca.setNumeroTelefonoFamiliare(simpleRicerca.getNumeroTelefono());
-			
+			ModelMapper mapper = new ModelMapper();
+			RicercaDTO ricerca = ConvertionUtils.convertSimpleRicercaDTOtoRicercaDTO(simpleRicerca);
+
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{
 				logger.info("Invocazione servizio mock per ricerca lista detenuti di un familiare...");
@@ -130,6 +129,7 @@ public class DetenutoController
 			
 			return ResponseEntity.ok(listaDetenuti.stream()
 				   .map(det -> mapper.map(det, GetListaDetenutiDTO.class)).collect(Collectors.toList()));
+
 		}
 		
 		catch(SiapAfisMWException ex)

@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.ibm.db2.jcc.am.mf;
+
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
@@ -91,18 +93,20 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		
 		logger.info("Esecuzione query nativa...");
 		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola).getResultList();
+
+		/* costruzione detenuto */
+		DetenutoDTO detenuto = null;
 		
 		/* controllo presenza risultati */
 		if(CollectionUtils.isEmpty(listaRisultati))
 		{
-			logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
-			throw new SiapAfisMWException("Nessun detenuto trovato con la matricola fornita", HttpStatus.NOT_FOUND);
+			// logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
+			// throw new SiapAfisMWException("Nessun detenuto trovato con la matricola fornita", HttpStatus.NOT_FOUND);
+			return detenuto;
 		}
 		
 		logger.info("Numero risultati trovati: {}", listaRisultati.size());
 		
-		/* costruzione detenuto */
-		DetenutoDTO detenuto = null;
 		
 		logger.info("Preparazione oggetto di output...");
 		for(Object[] row : listaRisultati)
@@ -178,64 +182,48 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		String query = null;
 		
 		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
-			query = "SELECT "
-					+ "  DISTINCT ms.M150_NOME, "
-					+ "  MS.M150_COGN, "
-					+ "  mi.M155_ID_ISTITUTO, "
-					+ "  MS2.M157_DEN, "
-					+ "  mm.M00_MAT, "
-					+ "  MF.* "
-					+ "FROM "
-					+ "  GATEWAY.MDD301_FAMILIARE mf "
-					+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON mf.M301_ID_SOGG = ms.M150_ID_SOGG "
-					+ "  JOIN GATEWAY.MDD00_MATRICOLA mm ON mm.M00_ID_SOGG = MS.M150_ID_SOGG "
-					+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON mm.M00_MAT = MD.M166_MAT "
-					+ "  JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA "
-					+ "  JOIN GATEWAY.MDD160_REPARTO mr ON mr.M160_ID_REPARTO = MC.M161_ID_REPARTO "
-					+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON MS2.M157_ID_SEZIONE = mm.M00_C_SEZ_APP "
-					+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON mi.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO "
-					+ "WHERE "
-					+ "  mf.M301_COD_FISCALE = :codiceFiscale";
+			query = "SELECT " 
+					+" MS.M150_NOME , MS.M150_COGN , MI.M155_ID_ISTITUTO , MS2.M157_DEN , mm.M00_MAT , MF.* "
+					+" FROM GATEWAY.MDD301_FAMILIARE mf " 
+					+" JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG "
+					+" JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG "
+					+" JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT "
+					+" JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM AND MA.M304_PRG = MAF.M305_PRG_AUTOR"
+					+" JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT "
+					+" JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA "
+					+" JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO "
+					+" JOIN GATEWAY.MDD157_SEZIONE ms2 ON MS2.M157_ID_SEZIONE = MC.M161_ID_SEZIONE "
+					+" JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO "
+					+" WHERE "
+					+" MF.M301_COD_FISCALE = :codiceFiscale " 
+					+" AND MM.M00_DT_CARC_CHIUSA IS NULL "
+					+" AND MA.M304_FUNZ = 'C' AND MA.M304_STATO = 'V' AND MA.M304_TIPO = 'P' "
+					+" AND MD.M166_PROG_DISL = (SELECT MAX (MD2.M166_PROG_DISL) FROM GATEWAY.MDD166_DISLOCAZ md2 WHERE MD2.M166_MAT = MM.M00_MAT ) "
+					+" AND (MF.M301_DT_CANC IS NULL AND MS.M150_DT_CANC IS NULL AND MM.M00_DT_CANC IS NULL "
+					+" AND MD.M166_DT_CANC IS NULL AND MC.M161_DT_CANC IS NULL AND MR.M160_DT_CANC IS NULL ) "
+					+" ORDER BY mf.M301_DT_INS DESC ";
 		
 		else
-			query = "SELECT  DISTINCT "
-					+ "  ms.M150_NOME,  "
-					+ "  MS.M150_COGN,  "
-					+ "  mi.M155_ID_ISTITUTO,  "
-					+ "  MS2.M157_DEN,  "
-					+ "  mm.M00_MAT,  "
-					+ "  MF.*  "
-					+ "FROM  "
-					+ "  GATEWAY.MDD301_FAMILIARE mf  "
-					+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON mf.M301_ID_SOGG = ms.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD00_MATRICOLA mm ON mm.M00_ID_SOGG = MS.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON mm.M00_MAT = MD.M166_MAT  "
-					+ "  JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA  "
-					+ "  JOIN GATEWAY.MDD160_REPARTO mr ON mr.M160_ID_REPARTO = MC.M161_ID_REPARTO  "
-					+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON MS2.M157_ID_SEZIONE = mm.M00_C_SEZ_APP  "
-					+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON mi.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO  "
-					+ "WHERE  "
-					+ "  MF.M301_UTENZA = :utenza  "
-					+ "  AND MM.M00_DT_CARC_CHIUSA IS NULL  "
-					+ "  AND md.M166_PROG_DISL = ( "
-					+ "    SELECT  "
-					+ "      MAX(md2.M166_PROG_DISL)  "
-					+ "    FROM  "
-					+ "      GATEWAY.MDD166_DISLOCAZ md2  "
-					+ "    WHERE  "
-					+ "      MD2.M166_MAT = md.M166_MAT "
-					+ "  )  "
-					+ "  AND( "
-					+ "    mf.M301_DT_CANC IS NULL  "
-					+ "    AND ms.M150_DT_CANC IS NULL  "
-					+ "    AND mm.M00_DT_CANC IS NULL  "
-					+ "    AND md.M166_DT_CANC IS NULL  "
-					+ "    AND mc.M161_DT_CANC IS NULL  "
-					+ "    AND mr.M160_DT_CANC IS NULL  "
-					+ "    AND MS2.M157_DT_CANC IS NULL  "
-					+ "    AND mi.M155_D_CHIU IS NULL "
-					+ "  ) "
-					+ "";
+			query = "SELECT " 
+					+" MS.M150_NOME , MS.M150_COGN , MI.M155_ID_ISTITUTO , MS2.M157_DEN , mm.M00_MAT , MF.* "
+					+" FROM GATEWAY.MDD301_FAMILIARE mf " 
+					+" JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG "
+					+" JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG "
+					+" JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT "
+					+" JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM "
+					+" JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT "
+					+" JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA "
+					+" JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO "
+					+" JOIN GATEWAY.MDD157_SEZIONE ms2 ON MS2.M157_ID_SEZIONE = MC.M161_ID_SEZIONE "
+					+" JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO "
+					+" WHERE "
+					+" MF.M301_UTENZA = :utenza " 
+					+" AND MM.M00_DT_CARC_CHIUSA IS NULL "
+					+" AND MA.M304_FUNZ = 'C' AND MA.M304_STATO = 'V' AND MA.M304_TIPO = 'P' "
+					+" AND MD.M166_PROG_DISL = (SELECT MAX (MD2.M166_PROG_DISL) FROM GATEWAY.MDD166_DISLOCAZ md2 WHERE MD2.M166_MAT = MM.M00_MAT ) "
+					+" AND (MF.M301_DT_CANC IS NULL AND MS.M150_DT_CANC IS NULL AND MM.M00_DT_CANC IS NULL "
+					+" AND MD.M166_DT_CANC IS NULL AND MC.M161_DT_CANC IS NULL AND MR.M160_DT_CANC IS NULL ) "
+					+" ORDER BY mf.M301_DT_INS DESC ";
 		
 		/* preparazione output */
 		List<Object[]> listaOutput = null; 

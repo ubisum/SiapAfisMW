@@ -8,5 +8,5 @@ import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 public interface FamiliareService 
 {
 	public void insertFamiliare(FamiliareDTO familiare, String matricola) throws SiapAfisMWException;
-	public FamiliareModelDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException;
+	public FamiliareDTO getFamiliareByNumeroTelefonoCodiceFiscale(SimpleRicercaDTO ricerca) throws SiapAfisMWException;
 }
