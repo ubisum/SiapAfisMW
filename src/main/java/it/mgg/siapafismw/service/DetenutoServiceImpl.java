@@ -18,7 +18,7 @@ import it.mgg.siapafismw.dao.TrackingDAO;
 import it.mgg.siapafismw.dto.AvailabilityDTO;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
-import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.enums.EsitoTracking;
 import it.mgg.siapafismw.enums.TrackingOperation;
@@ -40,7 +40,13 @@ public class DetenutoServiceImpl implements DetenutoService
 	public DetenutoDTO findDetenutoByMatricola(String matricola) throws SiapAfisMWException 
 	{
 		logger.info("Accesso al servizio di ricerca del deteuto per matricola...");
-		return detenutoDAO.findDetenutoByMatricola(matricola);
+		DetenutoDTO detenuto = detenutoDAO.findDetenutoByMatricola(matricola);
+		
+		this.trackingDAO.storeTracking(TrackingOperation.GET_INFO_DETENUTO, 
+				                       new RicercaDetenutoDTO(matricola), 
+				                       EsitoTracking.OK);
+		
+		return detenuto;
 	}
 
 	@Override

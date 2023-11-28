@@ -75,7 +75,7 @@ public class FamiliareServiceImpl implements FamiliareService
 			return null;
 		
 		/* tracking */
-//		this.trackingDAO.storeTracking(TrackingOperation.GET_FAMILIARE, ricerca, EsitoTracking.OK);
+		this.trackingDAO.storeTracking(TrackingOperation.GET_FAMILIARE, ricerca, EsitoTracking.OK);
 		
 		
 		logger.info("Fine del servizio per la ricerca del familiare");

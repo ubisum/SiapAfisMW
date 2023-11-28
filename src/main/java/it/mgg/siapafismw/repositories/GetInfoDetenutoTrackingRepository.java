@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.mgg.siapafismw.model.tracking.GetInfoDetenutoTracking;
 
-public interface GetInfoDetenutoRepository extends JpaRepository<GetInfoDetenutoTracking, Integer> {
+public interface GetInfoDetenutoTrackingRepository extends JpaRepository<GetInfoDetenutoTracking, Integer> {
 
 }

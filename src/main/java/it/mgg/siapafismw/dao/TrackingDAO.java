@@ -7,4 +7,5 @@ import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 public interface TrackingDAO 
 {
 	public void storeTracking(TrackingOperation operation, Object data, EsitoTracking esito) throws SiapAfisMWException;
+	public Integer getSequenceNextVal(TrackingOperation operation);
 }

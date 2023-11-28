@@ -21,10 +21,12 @@ import it.mgg.siapafismw.model.tracking.GetInfoDetenutoTracking;
 import it.mgg.siapafismw.model.tracking.GetListaDetenutiTracking;
 import it.mgg.siapafismw.model.tracking.InsertOrUpdateColloquioTracking;
 import it.mgg.siapafismw.repositories.GetFamiliareTrackingRepository;
-import it.mgg.siapafismw.repositories.GetInfoDetenutoRepository;
+import it.mgg.siapafismw.repositories.GetInfoDetenutoTrackingRepository;
 import it.mgg.siapafismw.repositories.GetListaDetenutiTrackingRepository;
 import it.mgg.siapafismw.repositories.InsertOrUpdateColloquioTrackingRepository;
 import it.mgg.siapafismw.repositories.SalvaFamiliareTrackingRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Component
 public class TrackingDAOImpl implements TrackingDAO 
@@ -33,7 +35,7 @@ public class TrackingDAOImpl implements TrackingDAO
 	private GetFamiliareTrackingRepository getFamiliareRepository;
 	
 	@Autowired
-	private GetInfoDetenutoRepository getInfoDetenutoRepository;
+	private GetInfoDetenutoTrackingRepository getInfoDetenutoRepository;
 	
 	@Autowired
 	private GetListaDetenutiTrackingRepository getListaDetenutiRepository;
@@ -43,6 +45,9 @@ public class TrackingDAOImpl implements TrackingDAO
 	
 	@Autowired
 	private SalvaFamiliareTrackingRepository salvaFamiliareRepository;
+	
+	@PersistenceContext
+	private EntityManager entityManager;
 	
 	private static final Logger logger = LoggerFactory.getLogger(TrackingDAOImpl.class);
 	
@@ -100,7 +105,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				tracking.setDataInserimento(LocalDateTime.now());
 				tracking.setEsito(esito.getEsitoTracking());
 				tracking.setNumTelefono(ricercaFamiliare.getNumeroTelefono());
-//				tracking.setGetFamiliareTrackingId(2);
+				tracking.setGetFamiliareTrackingId(getSequenceNextVal(operation));
 				
 				this.getFamiliareRepository.save(tracking);
 				
@@ -126,6 +131,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				detenutoTracking.setDataInserimento(LocalDateTime.now());
 				detenutoTracking.setEsito(esito.getEsitoTracking());
 				detenutoTracking.setMatricola(ricercaDetenuto.getMatricola());
+				detenutoTracking.setGetInfoDetenutoTrackingId(this.getSequenceNextVal(operation));
 				
 				this.getInfoDetenutoRepository.save(detenutoTracking);
 				
@@ -201,6 +207,40 @@ public class TrackingDAOImpl implements TrackingDAO
 		
 		}
 
+	}
+
+	@Override
+	public Integer getSequenceNextVal(TrackingOperation operation) 
+	{
+		logger.info("Generazione prossimo valore della sequence per tracking {}...", operation.getOperation());
+		
+		/* definizione stringa parametrica */
+		String query = "SELECT GATEWAY.%s.nextval FROM SYSIBM.sysdummy1";
+		
+		switch(operation)
+		{
+			case GET_FAMILIARE:
+				query = String.format(query, "VDC_GET_FAMILIARE_TRACKING_SEQ");
+				break;
+			case GET_INFO_DETENUTO:
+				query = String.format(query, "VDC_GET_INFO_DETENUTO_TRACKING_SEQ");
+				break;
+			case GET_LISTA_DETENUTI:
+				break;
+			case INSERT_UPDATE_COLLOQUIO:
+				break;
+			case SALVA_FAMILIARE:
+				break;
+			default:
+				break;
+		
+		}
+		
+		logger.info("Esecuzione query {}...", query);
+		
+		Integer nextVal = (Integer)entityManager.createNativeQuery(query).getSingleResult();
+		
+		return nextVal;
 	}
 
 }
