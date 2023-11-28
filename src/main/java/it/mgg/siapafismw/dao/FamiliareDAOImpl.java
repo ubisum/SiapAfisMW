@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,16 +103,29 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Codice fiscale del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
-		/* controllo e riceerca del tipo documennto */
+		/* controllo e ricerca del tipo documennto */
 		if(StringUtils.isBlank(familiare.getDocumento()))
 		{
 			logger.info("Documento del familiare non valido");
 			throw new SiapAfisMWException("Documento del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
+		Integer idDocumento = null;
+		try
+		{
+			idDocumento = Integer.valueOf(familiare.getDocumento());
+		}
+		
+		catch(Throwable ex)
+		{
+			logger.info("Impossibile riconoscere il tipo di documento {} ",familiare.getDocumento(), ex);
+			throw new SiapAfisMWException("Impossibile riconoscere il tipo di documento " + 
+		                                       familiare.getDocumento(), HttpStatus.BAD_REQUEST);
+		}
+		
 		logger.info("Ricerca tipo documento...");
 		Optional<TipoDocumentoTMiddle> optTipoDocumento = this.tipoDocumentoTMiddleRepository
-				                       .findByDescrizioneIgnoreCase(familiare.getDocumento());
+				                       .findByIdTipoDocumento(idDocumento);
 		
 		if(optTipoDocumento.isEmpty())
 		{
@@ -146,7 +160,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		logger.info("Ricerca del grado parentela...");
-		Optional<RelazioneParentelaTMiddle> optRelazione = this.parentelaRepository.findByDescrizioneParentela(familiare.getGradoParentela().toUpperCase());
+		Optional<RelazioneParentelaTMiddle> optRelazione = this.parentelaRepository.findByIdParentelaIgnoreCase(familiare.getGradoParentela().toUpperCase());
 		if(optRelazione.isEmpty())
 		{
 			logger.info("Impossibile trovare il grado di parentela {}. Si prova ad cercare ua relazione di default...", familiare.getGradoParentela());

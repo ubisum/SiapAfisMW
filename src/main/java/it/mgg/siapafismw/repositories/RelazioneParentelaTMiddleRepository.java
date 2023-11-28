@@ -9,4 +9,5 @@ import it.mgg.siapafismw.model.RelazioneParentelaTMiddle;
 public interface RelazioneParentelaTMiddleRepository extends JpaRepository<RelazioneParentelaTMiddle, String> 
 {
 	Optional<RelazioneParentelaTMiddle> findByDescrizioneParentela(String parentela);
+	Optional<RelazioneParentelaTMiddle> findByIdParentelaIgnoreCase(String parentela);
 }

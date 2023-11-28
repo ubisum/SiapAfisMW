@@ -9,4 +9,5 @@ import it.mgg.siapafismw.model.TipoDocumentoTMiddle;
 public interface TipoDocumentoTMiddleRepository extends JpaRepository<TipoDocumentoTMiddle, Integer> 
 {
 	Optional<TipoDocumentoTMiddle> findByDescrizioneIgnoreCase(String descrizione);
+	Optional<TipoDocumentoTMiddle> findByIdTipoDocumento(Integer idTipo);
 }

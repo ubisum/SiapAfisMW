@@ -70,11 +70,12 @@ public class FamiliareServiceImpl implements FamiliareService
 			
 			logger.info("Fine operazione di conversione");
 		}
+		
 		else
-		return null;
+			return null;
 		
 		/* tracking */
-		this.trackingDAO.storeTracking(TrackingOperation.GET_FAMILIARE, ricerca, EsitoTracking.OK);
+//		this.trackingDAO.storeTracking(TrackingOperation.GET_FAMILIARE, ricerca, EsitoTracking.OK);
 		
 		
 		logger.info("Fine del servizio per la ricerca del familiare");

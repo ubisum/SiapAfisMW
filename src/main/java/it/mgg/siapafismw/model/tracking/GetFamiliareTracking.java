@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +21,11 @@ import lombok.NoArgsConstructor;
 public class GetFamiliareTracking 
 {
 	@Id
-//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "get_familiare_seq", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "get_familiare_seq", 
+	sequenceName = "VDC_GET_FAMILIARE_TRACKING_SEQ", 
+	allocationSize = 1,
+	schema = "GATEWAY")
 	@Column(name = "GET_FAMILIARE_TRACKING_ID")
 	private Integer getFamiliareTrackingId;
 	

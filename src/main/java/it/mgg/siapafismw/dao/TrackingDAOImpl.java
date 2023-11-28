@@ -100,7 +100,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				tracking.setDataInserimento(LocalDateTime.now());
 				tracking.setEsito(esito.getEsitoTracking());
 				tracking.setNumTelefono(ricercaFamiliare.getNumeroTelefono());
-				tracking.setGetFamiliareTrackingId(2);
+//				tracking.setGetFamiliareTrackingId(2);
 				
 				this.getFamiliareRepository.save(tracking);
 				
