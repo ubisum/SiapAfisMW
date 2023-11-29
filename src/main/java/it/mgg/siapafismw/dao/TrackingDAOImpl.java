@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,9 @@ public class TrackingDAOImpl implements TrackingDAO
 	@Autowired
 	private SalvaFamiliareTrackingRepository salvaFamiliareRepository;
 	
+	@Value("${siapafismw.tracking.active}")
+	private String trackingActive;
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	
@@ -54,6 +58,12 @@ public class TrackingDAOImpl implements TrackingDAO
 	@Override
 	public void storeTracking(TrackingOperation operation, Object data, EsitoTracking esito) throws SiapAfisMWException 
 	{
+		if(StringUtils.isBlank(trackingActive) || !trackingActive.equalsIgnoreCase("true"))
+		{
+			logger.warn("Tracking dei servizi non attivo");
+			return;
+		}
+		
 		/* individuazione dell'operazione richiesta */
 		if(operation == null)
 		{
@@ -155,6 +165,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				logger.info("Inserimento record di tracking...");
 				
 				GetListaDetenutiTracking listaDetenutiTracking = new GetListaDetenutiTracking();
+				listaDetenutiTracking.setGetListaDetenutiTrackingId(this.getSequenceNextVal(operation));
 				listaDetenutiTracking.setCodiceFiscale(ricercaListaDetenuti.getCodiceFiscale());
 				listaDetenutiTracking.setDataInserimento(LocalDateTime.now());
 				listaDetenutiTracking.setEsito(esito.getEsitoTracking());
@@ -226,6 +237,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				query = String.format(query, "VDC_GET_INFO_DETENUTO_TRACKING_SEQ");
 				break;
 			case GET_LISTA_DETENUTI:
+				query = String.format(query, "VDC_GET_LISTA_DETENUTI_TRACKING_SEQ");
 				break;
 			case INSERT_UPDATE_COLLOQUIO:
 				break;

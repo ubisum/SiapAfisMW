@@ -19,6 +19,7 @@ import it.mgg.siapafismw.dto.AvailabilityDTO;
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.dto.SlotDisponibileDTO;
 import it.mgg.siapafismw.enums.EsitoTracking;
 import it.mgg.siapafismw.enums.TrackingOperation;
@@ -141,9 +142,9 @@ public class DetenutoServiceImpl implements DetenutoService
 			logger.info("Nessun detenuto trovato");
 		
 		/* tracking */
-//		this.trackingDAO.storeTracking(TrackingOperation.GET_LISTA_DETENUTI, 
-//				                       new SimpleRicercaDTO(ricerca.getNumeroTelefonoFamiliare(), ricerca.getCodiceFiscaleFamiliare()), EsitoTracking.OK);
-//		
+		this.trackingDAO.storeTracking(TrackingOperation.GET_LISTA_DETENUTI, 
+				                       new SimpleRicercaDTO(ricerca.getNumeroTelefonoFamiliare(), ricerca.getCodiceFiscaleFamiliare()), EsitoTracking.OK);
+		
 		
 		return listaDTO;
 	}

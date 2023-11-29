@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.ibm.db2.jcc.am.mf;
-
 import it.mgg.siapafismw.dto.DetenutoDTO;
 import it.mgg.siapafismw.dto.RicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
@@ -55,7 +53,8 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		
 		/* esecuzione query */
 		String query = "SELECT  "
-				+ "  DISTINCT ma.M304_TIPO,  "
+//				+ "  DISTINCT ma.M304_TIPO,  "
+				+ "  DISTINCT "
 				+ "  ms.M150_NOME,  "
 				+ "  MS.M150_COGN,  "
 				+ "  mm.M00_MAT,  "
@@ -68,11 +67,11 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ "  JOIN GATEWAY.MDD161_CELLA mc ON md.M166_ID_CELLA = mc.M161_ID_CELLA  "
 				+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON mc.M161_ID_ISTITUTO = mi.M155_ID_ISTITUTO  "
 				+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mc.M161_ID_SEZIONE  "
-				+ "  JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = mm.M00_MAT  "
+//				+ "  JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = mm.M00_MAT  "
 				+ "WHERE  "
 				+ "  mm.M00_MAT = :matricola  "
-				+ "  AND ma.M304_FUNZ = 'C'  "
-				+ "  AND ma.M304_STATO = 'V'  "
+//				+ "  AND ma.M304_FUNZ = 'C'  "
+//				+ "  AND ma.M304_STATO = 'V'  "
 				+ "  AND mm.M00_DT_CARC_CHIUSA IS NULL  "
 				+ "  AND md.M166_PROG_DISL = ( "
 				+ "    SELECT  "
@@ -87,7 +86,7 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ "    AND ms.M150_DT_CANC IS NULL  "
 				+ "    AND MD.M166_DT_CANC IS NULL  "
 				+ "    AND MS2.M157_DT_CANC IS NULL  "
-				+ "    AND ma.M304_DT_CANC IS NULL "
+//				+ "    AND ma.M304_DT_CANC IS NULL "
 				+ "  ) "
 				+ "";
 		
@@ -100,35 +99,32 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		/* controllo presenza risultati */
 		if(CollectionUtils.isEmpty(listaRisultati))
 		{
-			// logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
-			// throw new SiapAfisMWException("Nessun detenuto trovato con la matricola fornita", HttpStatus.NOT_FOUND);
+			logger.info("Nessun detenuto trovato con la matricola fornita {}", matricola);
 			return detenuto;
 		}
 		
-		logger.info("Numero risultati trovati: {}", listaRisultati.size());
+		logger.info("Numero risultati trovati: {}. Preparazione query per ricerca autorizzazioni associate alla matricola...", listaRisultati.size());
 		
+		String ricercaAutorizzazioni = "SELECT count(*) "
+				+ "FROM GATEWAY.MDD304_AUTORIZZ aut "
+				+ "WHERE aut.M304_FUNZ = 'C' "
+				+ " AND aut.M304_STATO = 'V' "
+				+ " AND aut.M304_TIPO = 'P' "
+				+ " AND aut.M304_DT_CANC IS NULL  "
+				+ " AND aut.M304_MAT = :matricola";
+		
+		Integer numResults = (Integer)entityManager.createNativeQuery(ricercaAutorizzazioni).setParameter("matricola", matricola).getSingleResult();
 		
 		logger.info("Preparazione oggetto di output...");
-		for(Object[] row : listaRisultati)
-		{
-			String tipoAutorizzazione = row[0] != null ? String.valueOf((char)row[0]) : null;
-			
-			if(detenuto == null)
-			{
-				detenuto = new DetenutoDTO();
-				detenuto.setNome((String)row[1]);
-				detenuto.setCognome((String)row[2]);
-				detenuto.setMatricola((String)row[3]);
-				detenuto.setPenitenziario((String)row[4]);
-				detenuto.setSezione((String)row[5]);
-			}
-			
-			if("P".equalsIgnoreCase(tipoAutorizzazione))
-			{
-				detenuto.setAvailable(true);
-				break;
-			}
-		}
+		Object[] row = listaRisultati.get(0);
+		
+		detenuto = new DetenutoDTO();
+		detenuto.setNome((String)row[0]);
+		detenuto.setCognome((String)row[1]);
+		detenuto.setMatricola((String)row[2]);
+		detenuto.setPenitenziario((String)row[3]);
+		detenuto.setSezione((String)row[4]);
+		detenuto.setAvailable(numResults != null && numResults > 0);
 		
 		logger.info("Terminata preparazione oggetto di output, con flag available = {}", detenuto.isAvailable());
 
