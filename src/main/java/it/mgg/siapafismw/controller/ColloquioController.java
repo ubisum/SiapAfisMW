@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import it.mgg.siapafismw.dto.ColloquioDTO;
-import it.mgg.siapafismw.dto.InsertUpdateDTO;
+import it.mgg.siapafismw.dto.EsitoDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.service.ColloquioService;
 
@@ -37,34 +38,40 @@ public class ColloquioController
 	private static final Logger logger = LoggerFactory.getLogger(ColloquioController.class);
 	
 	@PostMapping("/InsertOrUpdateColloquio")
-	public ResponseEntity<ColloquioDTO> insertOrUpdateColloquio(@RequestBody InsertUpdateDTO insertUpdate)
+	public ResponseEntity<EsitoDTO> insertOrUpdateColloquio(@RequestBody ColloquioDTO insertUpdate)
 	{
 		logger.info("Accesso all'endpoint InsertOrUpdateColloquio");
+		EsitoDTO esito = new EsitoDTO();
 		
 		try
 		{
-			ColloquioDTO colloquio = null;
 			
 			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
 			{
 				logger.info("Richiesta servizio con mock...");
-				colloquio = this.colloquioServiceMockImpl.insertUpdateColloquio(insertUpdate);
+				this.colloquioServiceMockImpl.insertUpdateColloquio(insertUpdate);
 			}
 			
 			else
 			{
 				logger.info("Richiesta servizio senza mock...");
-				colloquio = this.colloquioServiceImpl.insertUpdateColloquio(insertUpdate);
+				this.colloquioServiceImpl.insertUpdateColloquio(insertUpdate);
 			}
 			
-			return ResponseEntity.ok().body(colloquio);
+			esito.setResponseCode(String.valueOf(HttpStatus.OK.value()));
+			esito.setResponseDescription("Colloquio aggiunto o modificato con successo");
+			
+			return ResponseEntity.ok().body(esito);
 		}
 		
 		catch(SiapAfisMWException ex)
 		{
 			logger.info("Si e' verificata un'eccezione", ex);
 			
-			return ResponseEntity.status(ex.getStatus()).body(null);
+			esito.setResponseCode(String.valueOf(ex.getStatus().value()));
+			esito.setResponseDescription(ex.getMessage());
+			
+			return ResponseEntity.status(ex.getStatus()).body(esito);
 			
 		}
 		
@@ -73,7 +80,10 @@ public class ColloquioController
 			logger.info("Si e' verificato un errore interno", ex);
 			logger.info("Preparazione risposta con codice 500...");
 			
-			return ResponseEntity.internalServerError().body(null);
+			esito.setResponseCode(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+			esito.setResponseDescription("Si e' verificato un errore interno");
+			
+			return ResponseEntity.internalServerError().body(esito);
 		}
 		
 	}
