@@ -13,4 +13,8 @@ public interface ColloquioFamiliareTMIddleRepository extends JpaRepository<Collo
 			+ " coll.colloquioId.M303_MAT = :matricola"
 			+ " and coll.colloquioId.M303_PRG = :progressivo")
 	public ColloquioFamiliareTMiddle fidByMatricolaProgressivo(String matricola, Integer progressivo);
+	
+	@Query("select max(coll.colloquioId.M303_PRG) from ColloquioFamiliareTMiddle coll "
+			+ "where coll.colloquioId.M303_MAT = :matricola")
+	public Integer getMaxProgressivoByMatricola(String matricola);
 }

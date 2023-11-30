@@ -10,4 +10,8 @@ public interface FamiliareTMiddleRepository extends JpaRepository<FamiliareTMidd
 {
 	@Query("select max(f.familiareId.M301_PRG_FAM) from FamiliareTMiddle f where f.familiareId.M301_ID_SOGG = :idSoggetto")
 	public Integer getMaxPrgFamiliare(Integer idSoggetto);
+	
+	@Query("select f.familiareId.M301_PRG_FAM from FamiliareTMiddle f where f.familiareId.M301_ID_SOGG = :idSoggetto and "
+		 + "(f.utenza = :utenza or f.codiceFiscale = :codiceFiscale)")
+	public Integer getProgressivoFamiliareAssociato(Integer idSoggetto, String utenza, String codiceFiscale);
 }

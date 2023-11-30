@@ -21,12 +21,6 @@ public class ColloquioTMiddle
 	@EmbeddedId
 	private ColloquioTMiddleId colloquioId;
 	
-	@Column(name = "M321_PRG_SOST")
-	private Integer prgSost;
-	
-	@Column(name = "M321_DATA_ORA")
-	private LocalDateTime dataOra;
-	
 	@Column(name = "M321_ID_INTERPR")
 	private Integer idInterpr;
 	
@@ -37,7 +31,7 @@ public class ColloquioTMiddle
 	private LocalDateTime dataCancellazione;
 	
 	@Column(name = "M321_LOGIN_INS")
-	private Integer loginIs;
+	private Integer loginIns;
 	
 	@Column(name = "M321_DT_INS")
 	private LocalDateTime dataInserimento;
