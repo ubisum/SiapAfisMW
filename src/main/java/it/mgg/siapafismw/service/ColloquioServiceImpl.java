@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import it.mgg.siapafismw.dao.TrackingDAO;
 import it.mgg.siapafismw.dto.ColloquioDTO;
+import it.mgg.siapafismw.enums.EsitoTracking;
+import it.mgg.siapafismw.enums.TrackingOperation;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.ColloquioFamiliareTMiddle;
 import it.mgg.siapafismw.model.ColloquioFamiliareTMiddleId;
@@ -49,6 +52,9 @@ public class ColloquioServiceImpl implements ColloquioService
 	
 	@Autowired
 	private FamiliareTMiddleRepository familiareTMiddleRepository;
+	
+	@Autowired
+	private TrackingDAO trackingDAO;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ColloquioServiceImpl.class);
 	
@@ -404,6 +410,9 @@ public class ColloquioServiceImpl implements ColloquioService
 			
 			this.idDataVerseMappingRepository.save(mapping);
 		}
+		
+		/* tracking */
+		this.trackingDAO.storeTracking(TrackingOperation.INSERT_UPDATE_COLLOQUIO, insertUpdate, EsitoTracking.OK);
 
 	}
 
