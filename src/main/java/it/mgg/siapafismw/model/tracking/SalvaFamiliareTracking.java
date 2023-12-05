@@ -1,11 +1,12 @@
-package it.mgg.siapafismw.model;
+package it.mgg.siapafismw.model.tracking;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,8 +19,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SalvaFamiliareTracking 
 {
-	@EmbeddedId
-	private SalvaFamiliareTrackingId salvaFamiliareTrackigId;
+	@Id
+	@Column(name = "VDC_SALVA_FAMILIARE_TRACKING_ID")
+	private Integer salvaFamiliareTrackingId;
 	
 	@Column(name = "NOME_FAMILIARE")
 	private String nomeFamiliare;
@@ -30,24 +32,25 @@ public class SalvaFamiliareTracking
 	@Column(name = "CODICE_FISCALE_FAMILIARE")
 	private String codiceFiscaleFamiliare;
 	
-	@Column(name = "RELAZIONE_PARENTELA")
-	private String relazioneParentela;
+	@Column(name = "GRADO_PARENTELA")
+	private String gradoParentela;
 	
-	@Column(name = "UTENZA_FAMILIARE")
-	private String utenzaFamiliare;
+	@Column(name = "TELEFONO_FAMILIARE")
+	private String telefonoFamiliare;
 	
-	@Column(name = "TIPO_DOCUMENTO_FAMILIARE")
-	private Integer tipoDocumentoFamiliare;
+	@Column(name = "DOCUMENTO_FAMILIARE")
+	private String documentoFamiliare;
 	
 	@Column(name = "NUMERO_DOCUMENTO_FAMILIARE")
 	private String numeroDocumentoFamiliare;
 	
 	@Column(name = "DATA_DOCUMENTO_FAMILIARE")
-	private LocalDate dataDocumentoFamiliare;
-	
-	@Column(name = "LOGIN_INS")
-	private Integer loginIns;
+	private String dataDocumentoFamiliare;
 	
 	@Column(name = "DATA_INSERIMENTO")
-	private LocalDateTime dataInserimento;
+	private LocalDateTime dataInserimennto;
+	
+	@OneToMany(mappedBy = "salvaFamiliare")
+	private List<SalvaFamiliareAllegatiTracking> listaAllegati;
+		
 }

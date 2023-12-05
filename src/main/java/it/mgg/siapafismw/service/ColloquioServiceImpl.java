@@ -213,11 +213,7 @@ public class ColloquioServiceImpl implements ColloquioService
 		}
 		
 		try
-		{
-//			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-//			String formattedDate = formatter.format(LocalDateTime.now());
-//			dataColloquio = LocalDateTime.parse(insertUpdate.getData(), formatter);
-			
+		{	
 			ZonedDateTime zdt = ZonedDateTime.parse(insertUpdate.getData());
 			dataColloquio = zdt.toLocalDateTime();
 			
@@ -262,12 +258,13 @@ public class ColloquioServiceImpl implements ColloquioService
 		
 		if(insertUpdate.getModalita().equals("V"))
 		{
+			logger.info("Modalita' videocolloquio rilevata, inserimento flag relativi...");
 			colloquioFamiliare.setVideoColloquio("S");
 			colloquioFamiliare.setIdModalita(2);
 		}
 		
 		logger.info("Controllo ore richieste...");
-		if(insertUpdate.getOreRichieste() == null || insertUpdate.getOreRichieste() == 0)
+		if(insertUpdate.getOreRichieste() == null || insertUpdate.getOreRichieste() <= 0)
 		{
 			logger.info("Valore delle ore richieste non valido");
 			throw new SiapAfisMWException("Valore delle ore richieste non valido", HttpStatus.BAD_REQUEST);
@@ -275,8 +272,18 @@ public class ColloquioServiceImpl implements ColloquioService
 		
 		colloquioFamiliare.setOreColloquioRichieste(insertUpdate.getOreRichieste());
 		
-		logger.info("Inserimento ore effettive...");
-		colloquioFamiliare.setOreColloquioEffettive(insertUpdate.getOreEffettive());
+		if(insertUpdate.getOreEffettive() != null)
+		{
+			if(insertUpdate.getOreEffettive() < 0)
+			{
+				logger.info("Valore delle ore effettive non valido");
+				throw new SiapAfisMWException("Valore delle ore effettive non valido", HttpStatus.BAD_REQUEST);
+			}
+			
+			logger.info("Inserimento ore effettive...");
+			colloquioFamiliare.setOreColloquioEffettive(insertUpdate.getOreEffettive());
+		}
+		
 		
 		logger.info("Inserimento ora inizio e fine colloquio...");
 		try
@@ -326,8 +333,8 @@ public class ColloquioServiceImpl implements ColloquioService
 				Object codiceFiscale = getterCF.invoke(insertUpdate);
 				Object numeroTelefono = getterTel.invoke(insertUpdate);
 				
-				if((codiceFiscale != null && StringUtils.isNotBlank((String)numeroTelefono)) || 
-					(numeroTelefono != null && StringUtils.isNotBlank((String)codiceFiscale)))
+				if((codiceFiscale != null && StringUtils.isNotBlank((String)codiceFiscale)) || 
+					(numeroTelefono != null && StringUtils.isNotBlank((String)numeroTelefono)))
 				{
 					logger.info("Analisi del familiare con dati di ricerca (TELEFONO, CODICE FISCALE) = ({}, {})", 
 							numeroTelefono != null && StringUtils.isNotBlank((String)numeroTelefono)? (String)numeroTelefono : "NULL",

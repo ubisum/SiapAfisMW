@@ -18,11 +18,6 @@ import lombok.NoArgsConstructor;
 public class GetFamiliareTracking 
 {
 	@Id
-//	@GeneratedValue(generator = "get_familiare_seq", strategy = GenerationType.SEQUENCE)
-//	@SequenceGenerator(name = "get_familiare_seq", 
-//	sequenceName = "VDC_GET_FAMILIARE_TRACKING_SEQ", 
-//	allocationSize = 1,
-//	schema = "GATEWAY")
 	@Column(name = "GET_FAMILIARE_TRACKING_ID")
 	private Integer getFamiliareTrackingId;
 	

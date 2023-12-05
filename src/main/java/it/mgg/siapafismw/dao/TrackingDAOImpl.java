@@ -3,6 +3,7 @@ package it.mgg.siapafismw.dao;
 import java.time.LocalDateTime;
 
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import it.mgg.siapafismw.dto.InsertUpdateDTO;
+import it.mgg.siapafismw.dto.ColloquioDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.enums.EsitoTracking;
 import it.mgg.siapafismw.enums.TrackingOperation;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
-import it.mgg.siapafismw.model.SalvaFamiliareTracking;
 import it.mgg.siapafismw.model.tracking.GetFamiliareTracking;
 import it.mgg.siapafismw.model.tracking.GetInfoDetenutoTracking;
 import it.mgg.siapafismw.model.tracking.GetListaDetenutiTracking;
@@ -176,40 +176,36 @@ public class TrackingDAOImpl implements TrackingDAO
 				break;
 				
 			case INSERT_UPDATE_COLLOQUIO:
-				if(!(data instanceof InsertUpdateDTO))
+				if(!(data instanceof ColloquioDTO))
 				{
 					logger.info("L'oggetto fornito non e' adatto all'operazione richiesta");
 					throw new SiapAfisMWException("L'oggetto fornito non e' adatto all'operazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 				
-				InsertUpdateDTO insert = (InsertUpdateDTO)data;
-				if(StringUtils.isBlank(insert.getId()))
-				{
-					logger.info("Identificativo del colloquio non presente");
-					throw new SiapAfisMWException("Identificativo del colloquio non presente", HttpStatus.INTERNAL_SERVER_ERROR);
-				}
+				ColloquioDTO insert = (ColloquioDTO)data;
 				
 				logger.info("Inserimento record di tracking...");
 				
-				InsertOrUpdateColloquioTracking colloquio = new InsertOrUpdateColloquioTracking();
-				colloquio.setColloquioId(insert.getId());
+				ModelMapper mapper = new ModelMapper();
+				
+				InsertOrUpdateColloquioTracking colloquio = mapper.map(insert, InsertOrUpdateColloquioTracking.class);
+				colloquio.setInsertOrUpdateColloquioTrackingId(getSequenceNextVal(operation));
 				colloquio.setDataInserimento(LocalDateTime.now());
-				colloquio.setEsito(esito.getEsitoTracking());
 				
 				this.insertOrUpdateRepository.save(colloquio);
 				
 				break;
 				
 			case SALVA_FAMILIARE:
-				if(!(data instanceof SalvaFamiliareTracking))
-				{
-					logger.info("L'oggetto fornito non e' adatto all'operazione richiesta");
-					throw new SiapAfisMWException("L'oggetto fornito non e' adatto all'operazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-				
-				SalvaFamiliareTracking salvaFamiliare = (SalvaFamiliareTracking)data;
-				
-				this.salvaFamiliareRepository.save(salvaFamiliare);
+//				if(!(data instanceof SalvaFamiliareTracking))
+//				{
+//					logger.info("L'oggetto fornito non e' adatto all'operazione richiesta");
+//					throw new SiapAfisMWException("L'oggetto fornito non e' adatto all'operazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR);
+//				}
+//				
+//				SalvaFamiliareTracking salvaFamiliare = (SalvaFamiliareTracking)data;
+//				
+//				this.salvaFamiliareRepository.save(salvaFamiliare);
 				
 				break;
 				
@@ -240,8 +236,13 @@ public class TrackingDAOImpl implements TrackingDAO
 				query = String.format(query, "VDC_GET_LISTA_DETENUTI_TRACKING_SEQ");
 				break;
 			case INSERT_UPDATE_COLLOQUIO:
+				query = String.format(query, "VDC_INSERT_OR_UPDATE_COLLOQUIO_TRACKING_SEQ");
 				break;
 			case SALVA_FAMILIARE:
+				query = String.format(query, "VDC_SALVA_FAMILIARE_TRACKING_SEQ");
+				break;
+			case SALVA_FAMILIARE_ALLEGATI:
+				query = String.format(query, "VDC_SALVA_FAMILIARE_ALLEGATI_TRACKING_SEQ");
 				break;
 			default:
 				break;

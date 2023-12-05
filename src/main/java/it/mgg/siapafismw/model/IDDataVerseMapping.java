@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ID_DATA_VERSE_MAPPING", schema = "GATEWAY")
+@Table(name = "VDC_COLLOQ_GATEWAY", schema = "GATEWAY")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
