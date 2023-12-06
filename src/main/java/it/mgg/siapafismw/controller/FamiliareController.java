@@ -88,7 +88,7 @@ public class FamiliareController
 			logger.info("Preparazione risposta con codice 500...");
 			
 			esito.setResponseCode("500");
-			esito.setResponseDescription(StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : INTERNAL_SERVER_ERROR);
+			esito.setResponseDescription(INTERNAL_SERVER_ERROR);
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		
