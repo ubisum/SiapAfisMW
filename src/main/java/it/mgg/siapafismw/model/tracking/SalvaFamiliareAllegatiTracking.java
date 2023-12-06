@@ -21,7 +21,7 @@ public class SalvaFamiliareAllegatiTracking
 {
 	@Id
 	@Column(name = "VDC_SALVA_FAMILIARE_ALLEGATI_TRACKING_ID")
-	private Integer salvaFamiliareeAllegatiId;
+	private Integer salvaFamiliareAllegatiId;
 	
 	@Column(name = "NOME_FILE")
 	private String nomeFile;

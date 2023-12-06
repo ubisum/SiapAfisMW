@@ -1,16 +1,22 @@
 package it.mgg.siapafismw.utils;
 
-import it.mgg.siapafismw.dto.RicercaDTO;
-import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
 
 import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.FamiliareDTO;
+import it.mgg.siapafismw.dto.RicercaDTO;
+import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.model.Allegato;
 import it.mgg.siapafismw.model.Familiare;
-
-import java.util.ArrayList;
-import java.util.List;
+import it.mgg.siapafismw.model.tracking.SalvaFamiliareTracking;
 
 public class ConvertionUtils
 {
@@ -51,5 +57,24 @@ public class ConvertionUtils
         ricerca.setCodiceFiscaleFamiliare(simpleRicerca.getCodiceFiscale());
         ricerca.setNumeroTelefonoFamiliare(simpleRicerca.getNumeroTelefono());
         return ricerca;
+    }
+    
+    public static SalvaFamiliareTracking convertFamiliareDTO2SalvaFamiliareTracking(FamiliareDTO familiare)
+    {
+    	/* definizione converter della data */
+    	Converter<String, LocalDate> converter = new AbstractConverter<String, LocalDate>() 
+    	{
+    		public LocalDate convert(String source)
+    		{
+    			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    			return LocalDate.parse(source, formatter);
+    			
+    		}
+		};
+		
+		ModelMapper mapper = new ModelMapper();
+		mapper.addConverter(converter);
+		
+		return mapper.map(familiare, SalvaFamiliareTracking.class);
     }
 }

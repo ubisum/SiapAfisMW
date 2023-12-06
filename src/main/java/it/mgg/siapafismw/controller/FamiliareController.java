@@ -77,7 +77,7 @@ public class FamiliareController
 		catch(SiapAfisMWException ex)
 		{
 			logger.info("Si e' verificata un'eccezione", ex);
-			esito.setResponseCode(ex.getStatus().toString());
+			esito.setResponseCode(String.valueOf(ex.getStatus().value()));
 			esito.setResponseDescription(ex.getMessage());
 			status = ex.getStatus();
 		}

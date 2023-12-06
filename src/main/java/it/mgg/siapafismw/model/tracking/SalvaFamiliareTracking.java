@@ -1,5 +1,6 @@
 package it.mgg.siapafismw.model.tracking;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,28 +25,28 @@ public class SalvaFamiliareTracking
 	private Integer salvaFamiliareTrackingId;
 	
 	@Column(name = "NOME_FAMILIARE")
-	private String nomeFamiliare;
+	private String nome;
 	
 	@Column(name = "COGNOME_FAMILIARE")
-	private String cognomeFamiliare;
+	private String cognome;
 	
 	@Column(name = "CODICE_FISCALE_FAMILIARE")
-	private String codiceFiscaleFamiliare;
+	private String codiceFiscale;
 	
 	@Column(name = "GRADO_PARENTELA")
 	private String gradoParentela;
 	
 	@Column(name = "TELEFONO_FAMILIARE")
-	private String telefonoFamiliare;
+	private String telefono;
 	
 	@Column(name = "DOCUMENTO_FAMILIARE")
-	private String documentoFamiliare;
+	private String documento;
 	
 	@Column(name = "NUMERO_DOCUMENTO_FAMILIARE")
-	private String numeroDocumentoFamiliare;
+	private String numeroDocumento;
 	
 	@Column(name = "DATA_DOCUMENTO_FAMILIARE")
-	private String dataDocumentoFamiliare;
+	private LocalDate dataDocumento;
 	
 	@Column(name = "DATA_INSERIMENTO")
 	private LocalDateTime dataInserimennto;

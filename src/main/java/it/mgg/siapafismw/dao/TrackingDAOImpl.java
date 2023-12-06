@@ -2,6 +2,7 @@ package it.mgg.siapafismw.dao;
 
 import java.time.LocalDateTime;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import it.mgg.siapafismw.dto.AllegatoDTO;
 import it.mgg.siapafismw.dto.ColloquioDTO;
+import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.enums.EsitoTracking;
@@ -21,11 +24,15 @@ import it.mgg.siapafismw.model.tracking.GetFamiliareTracking;
 import it.mgg.siapafismw.model.tracking.GetInfoDetenutoTracking;
 import it.mgg.siapafismw.model.tracking.GetListaDetenutiTracking;
 import it.mgg.siapafismw.model.tracking.InsertOrUpdateColloquioTracking;
+import it.mgg.siapafismw.model.tracking.SalvaFamiliareAllegatiTracking;
+import it.mgg.siapafismw.model.tracking.SalvaFamiliareTracking;
 import it.mgg.siapafismw.repositories.GetFamiliareTrackingRepository;
 import it.mgg.siapafismw.repositories.GetInfoDetenutoTrackingRepository;
 import it.mgg.siapafismw.repositories.GetListaDetenutiTrackingRepository;
 import it.mgg.siapafismw.repositories.InsertOrUpdateColloquioTrackingRepository;
+import it.mgg.siapafismw.repositories.SalvaFamiliareAllegatiTrackingRepository;
 import it.mgg.siapafismw.repositories.SalvaFamiliareTrackingRepository;
+import it.mgg.siapafismw.utils.ConvertionUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -46,6 +53,9 @@ public class TrackingDAOImpl implements TrackingDAO
 	
 	@Autowired
 	private SalvaFamiliareTrackingRepository salvaFamiliareRepository;
+	
+	@Autowired
+	private SalvaFamiliareAllegatiTrackingRepository salvaFamiliareAllegatiTrackingRepository;
 	
 	@Value("${siapafismw.tracking.active}")
 	private String trackingActive;
@@ -89,6 +99,9 @@ public class TrackingDAOImpl implements TrackingDAO
 		}
 		
 		logger.info("Avvio dell'operazione di tracking {}...", requestedOperation);
+		
+		/* oggetti di lavoro */
+		ModelMapper mapper = new ModelMapper();
 		
 		/* gestione delle casistiche di tracking */
 		switch(operation)
@@ -186,8 +199,6 @@ public class TrackingDAOImpl implements TrackingDAO
 				
 				logger.info("Inserimento record di tracking...");
 				
-				ModelMapper mapper = new ModelMapper();
-				
 				InsertOrUpdateColloquioTracking colloquio = mapper.map(insert, InsertOrUpdateColloquioTracking.class);
 				colloquio.setInsertOrUpdateColloquioTrackingId(getSequenceNextVal(operation));
 				colloquio.setDataInserimento(LocalDateTime.now());
@@ -197,15 +208,36 @@ public class TrackingDAOImpl implements TrackingDAO
 				break;
 				
 			case SALVA_FAMILIARE:
-//				if(!(data instanceof SalvaFamiliareTracking))
-//				{
-//					logger.info("L'oggetto fornito non e' adatto all'operazione richiesta");
-//					throw new SiapAfisMWException("L'oggetto fornito non e' adatto all'operazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR);
-//				}
-//				
-//				SalvaFamiliareTracking salvaFamiliare = (SalvaFamiliareTracking)data;
-//				
-//				this.salvaFamiliareRepository.save(salvaFamiliare);
+				if(!(data instanceof FamiliareDTO))
+				{
+					logger.info("L'oggetto fornito non e' adatto all'operazione richiesta");
+					throw new SiapAfisMWException("L'oggetto fornito non e' adatto all'operazione richiesta", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				
+				/* inserimento dei dati base del familiare */
+				FamiliareDTO salvaFamiliare = (FamiliareDTO)data;
+				SalvaFamiliareTracking sfTracking = ConvertionUtils.convertFamiliareDTO2SalvaFamiliareTracking(salvaFamiliare);
+				
+				sfTracking.setSalvaFamiliareTrackingId(getSequenceNextVal(operation));
+				sfTracking.setDataInserimennto(LocalDateTime.now());
+				
+				sfTracking = this.salvaFamiliareRepository.save(sfTracking);
+				
+				/* inserimento dei dati dei documenti */
+				if(CollectionUtils.isNotEmpty(salvaFamiliare.getAllegati()))
+				{
+					for(AllegatoDTO allegato : salvaFamiliare.getAllegati())
+					{
+						SalvaFamiliareAllegatiTracking allegatoTracking = new SalvaFamiliareAllegatiTracking();
+						allegatoTracking.setDataInserimento(LocalDateTime.now());
+						allegatoTracking.setNomeFile(allegato.getNomeFile());
+						allegatoTracking.setSalvaFamiliare(sfTracking);
+						allegatoTracking.setSalvaFamiliareAllegatiId(getSequenceNextVal(TrackingOperation.SALVA_FAMILIARE_ALLEGATI));
+						allegatoTracking.setTipoFile(allegato.getTipo());
+						
+						this.salvaFamiliareAllegatiTrackingRepository.save(allegatoTracking);
+					}
+				}
 				
 				break;
 				

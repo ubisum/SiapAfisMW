@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 import it.mgg.siapafismw.dto.FamiliareDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
+import it.mgg.siapafismw.enums.EsitoTracking;
+import it.mgg.siapafismw.enums.TrackingOperation;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.model.AutorizzazioneFamiliareTMiddle;
 import it.mgg.siapafismw.model.AutorizzazioneFamiliareTMiddleId;
@@ -71,6 +73,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 	
 	@Autowired
 	private AutorizzazioneFamiliareTMiddleRepository autorizzazioneFamiliareTMiddleRepository;
+	
+	@Autowired
+	private TrackingDAOImpl trackingDAOImpl;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -242,31 +247,6 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		this.documentoTMiddleRepository.save(documentoTM);
 		
 		logger.info("Effettuata operazione SAVE del documento");
-		/*
-		 * 
-		 * logger.info("Preparazione record per tabella di tracking...");
-		SalvaFamiliareTracking tracking = new SalvaFamiliareTracking();
-		tracking.setSalvaFamiliareTrackigId(new SalvaFamiliareTrackingId(
-				                            idSoggetto.get().getIdSoggetto(), 
-				                            maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1, 
-				                            progressivoDocumento != null ? progressivoDocumento + 1 : 1));
-		
-		tracking.setNomeFamiliare(familiare.getNome());
-		tracking.setCognomeFamiliare(familiare.getCognome());
-		tracking.setCodiceFiscaleFamiliare(familiare.getCodiceFiscale());
-		tracking.setRelazioneParentela(optRelazione.get().getIdParentela());
-		tracking.setUtenzaFamiliare(familiare.getTelefono());
-		tracking.setTipoDocumentoFamiliare(optTipoDocumento.get().getIdTipoDocumento());
-		tracking.setNumeroDocumentoFamiliare(familiare.getNumeroDocumento());
-		tracking.setDataDocumentoFamiliare(dataDocumento);
-		tracking.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
-		tracking.setDataInserimento(LocalDateTime.now());
-		
-		this.familiareTrackingRepository.save(tracking);
-		 * 
-		 * 
-		 */
-		
 		
 		logger.info("Inizio inserimento autorizzazione...");
 		logger.info("Ricerca progressivo per tabella MDD304_AUTORIZZ...");
@@ -303,6 +283,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		autorizazioneFamiliare.setDataInserimento(LocalDateTime.now());
 		
 		this.autorizzazioneFamiliareTMiddleRepository.save(autorizazioneFamiliare);
+		
+		logger.info("Inserimento dati di tracking...");
+		this.trackingDAOImpl.storeTracking(TrackingOperation.SALVA_FAMILIARE, familiare, EsitoTracking.OK);
 		
 		logger.info("Fine metodo DAO per inserimento familiare");
 
