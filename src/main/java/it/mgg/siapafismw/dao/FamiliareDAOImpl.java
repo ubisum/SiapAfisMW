@@ -144,7 +144,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Numero documento del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
-		if(StringUtils.isBlank(familiare.getTelefono()) || !familiare.getTelefono().matches("^[0-9]+$"))
+		if(StringUtils.isBlank(familiare.getTelefono()) /*|| !familiare.getTelefono().matches("^[0-9]+$" ) */)
 		{
 			logger.info("Telefono del familiare non valido");
 			throw new SiapAfisMWException("Telefono del familiare non valido", HttpStatus.BAD_REQUEST);
@@ -334,7 +334,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		logger.info("Preparazione query nativa...");
-		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.DESCRIZIONE  , md.M302_NUM_DOC , mr.DESCRIZIONEREL , MD.M302_DT_DOC "
+		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.ID_TIPO_DOC  , md.M302_NUM_DOC , mr.IDRELPARENTELA , MD.M302_DT_DOC "
 				+ "FROM GATEWAY.MDD301_FAMILIARE mf  "
 				+ "JOIN GATEWAY.MDC_RELPARENTELA mr ON mr.IDRELPARENTELA  = mf.M301_REL_PAR   "
 				+ "JOIN GATEWAY.MDD302_DOCUMENTO md ON mf.M301_PRG_FAM = md.M302_PRG_FAM AND MF.M301_ID_SOGG = md.M302_ID_SOGG  "
@@ -380,16 +380,18 @@ public class FamiliareDAOImpl implements FamiliareDAO
         {
 			Date x = (Date)(listaRisultati.get(0)[7]);
 	        dataDoc = simplDateFormat.format(x);
-	           }
+        }
 
+		familiare.setNome(listaRisultati.get(0)[0] != null ? (String)listaRisultati.get(0)[0] : null);
+		familiare.setCognome(listaRisultati.get(0)[1] != null ? (String)listaRisultati.get(0)[1] : null);
+		familiare.setTelefono(listaRisultati.get(0)[2] != null ? (String)listaRisultati.get(0)[2] : null);
+		familiare.setCodiceFiscale(listaRisultati.get(0)[3] != null ? (String)listaRisultati.get(0)[3] : null);
 		
-		familiare.setNome((String)listaRisultati.get(0)[0]);
-		familiare.setCognome((String)listaRisultati.get(0)[1]);
-		familiare.setTelefono((String)listaRisultati.get(0)[2]);
-		familiare.setCodiceFiscale((String)listaRisultati.get(0)[3]);
-		familiare.setDocumento((String)listaRisultati.get(0)[4]);
-		familiare.setNumeroDocumento((String)listaRisultati.get(0)[5]);
-		familiare.setGradoParentela((String)listaRisultati.get(0)[6]);
+		familiare.setDocumento(listaRisultati.get(0)[4] != null ? String.valueOf((Short)listaRisultati.get(0)[4]) : null);
+		familiare.setNumeroDocumento(listaRisultati.get(0)[5] != null ? (String)listaRisultati.get(0)[5] : null);
+				
+		familiare.setGradoParentela(listaRisultati.get(0)[6] != null ? String.valueOf((Character)listaRisultati.get(0)[6]) : null);
+		
 		familiare.setDataDocumento(dataDoc);
 		
 		return familiare;

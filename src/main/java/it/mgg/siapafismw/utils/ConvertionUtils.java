@@ -31,6 +31,7 @@ public class ConvertionUtils
 		familiareDTO.setNumeroDocumento(familiare.getNumeroDocumento());
 		familiareDTO.setDataDocumento(familiare.getDataDocumento());
 		familiareDTO.setTelefono(familiare.getTelefono());
+		
 		familiareDTO.setGradoParentela(familiare.getGradoParentela());
 
 		if(CollectionUtils.isNotEmpty(familiare.getListaAllegati()))
