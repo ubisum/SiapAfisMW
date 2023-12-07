@@ -1,5 +1,6 @@
 package it.mgg.siapafismw.dao;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -334,11 +335,11 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		logger.info("Preparazione query nativa...");
-		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.ID_TIPO_DOC  , md.M302_NUM_DOC , mr.IDRELPARENTELA , MD.M302_DT_DOC "
+		String query = "SELECT mf.M301_NOME , mf.M301_COGNOME ,mf.M301_UTENZA , mf.M301_COD_FISCALE , mt.M_IDTIPODOC  , md.M302_NUM_DOC , mr.IDRELPARENTELA , MD.M302_DT_DOC "
 				+ "FROM GATEWAY.MDD301_FAMILIARE mf  "
 				+ "JOIN GATEWAY.MDC_RELPARENTELA mr ON mr.IDRELPARENTELA  = mf.M301_REL_PAR   "
 				+ "JOIN GATEWAY.MDD302_DOCUMENTO md ON mf.M301_PRG_FAM = md.M302_PRG_FAM AND MF.M301_ID_SOGG = md.M302_ID_SOGG  "
-				+ "JOIN GATEWAY.MDC_TIPODOCUMENTO mt ON md.M302_TIPO_DOC = MT.ID_TIPO_DOC  " 
+				+ "JOIN GATEWAY.CSSC_TPDOC mt ON md.M302_TIPO_DOC = MT.M_IDTIPODOC  " 
 				+ "WHERE (mf.M301_DT_CANC IS NULL  AND md.M302_DT_CANC IS NULL) ";
 		
 		List<Object[]> listaRisultati = null;
@@ -387,7 +388,7 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		familiare.setTelefono(listaRisultati.get(0)[2] != null ? (String)listaRisultati.get(0)[2] : null);
 		familiare.setCodiceFiscale(listaRisultati.get(0)[3] != null ? (String)listaRisultati.get(0)[3] : null);
 		
-		familiare.setDocumento(listaRisultati.get(0)[4] != null ? String.valueOf((Short)listaRisultati.get(0)[4]) : null);
+		familiare.setDocumento(listaRisultati.get(0)[4] != null ? String.valueOf((BigDecimal)listaRisultati.get(0)[4]) : null);
 		familiare.setNumeroDocumento(listaRisultati.get(0)[5] != null ? (String)listaRisultati.get(0)[5] : null);
 				
 		familiare.setGradoParentela(listaRisultati.get(0)[6] != null ? String.valueOf((Character)listaRisultati.get(0)[6]) : null);

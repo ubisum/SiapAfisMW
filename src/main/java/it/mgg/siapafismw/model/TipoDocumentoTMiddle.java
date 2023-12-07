@@ -1,7 +1,5 @@
 package it.mgg.siapafismw.model;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,22 +9,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "MDC_TIPODOCUMENTO", schema = "GATEWAY")
+@Table(name = "CSSC_TPDOC", schema = "GATEWAY")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TipoDocumentoTMiddle 
 {
 	@Id
-	@Column(name = "ID_TIPO_DOC")
+	@Column(name = "M_IDTIPODOC")
 	private Integer idTipoDocumento;
 	
-	@Column(name = "DESCRIZIONE")
+	@Column(name = "M_DESCRIZIONE")
 	private String descrizione;
-	
-	@Column(name = "DESCRBREVE")
-	private String descrizioneBreve;
-	
-	@Column(name = "DATAFINEVALIDITA")
-	private LocalDate dataFineValidita; 
 }
