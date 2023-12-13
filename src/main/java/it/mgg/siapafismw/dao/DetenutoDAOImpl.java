@@ -52,42 +52,43 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		}
 		
 		/* esecuzione query */
-		String query = "SELECT  "
-				+ "  DISTINCT ms.M150_NOME,  "
-				+ "  MS.M150_COGN,  "
-				+ "  mm.M00_MAT,  "
-				+ "  mi.M155_ID_ISTITUTO,  "
-				+ "  m160_descrizione,  "
-				+ "  ms2.m157_id_istituto AS ist_appartenenza  "
-				+ "FROM  "
-				+ "  GATEWAY.MDD00_MATRICOLA mm  "
-				+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON ms.M150_ID_SOGG = mm.M00_ID_SOGG  "
-				+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON md.M166_MAT = mm.M00_MAT  "
-				+ "  JOIN GATEWAY.MDD161_CELLA mc ON md.M166_ID_CELLA = mc.M161_ID_CELLA  "
-				+ "  JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO  "
-				+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON mc.M161_ID_ISTITUTO = mi.M155_ID_ISTITUTO  "
-				+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app  "
-				+ "WHERE  "
-				+ "  mm.M00_MAT = :matricola  "
-				+ "  AND mm.M00_DT_CARC_CHIUSA IS NULL  "
-				+ "  AND md.M166_PROG_DISL = ( "
-				+ "    SELECT  "
-				+ "      MAX(md2.M166_PROG_DISL)  "
-				+ "    FROM  "
-				+ "      GATEWAY.MDD166_DISLOCAZ md2  "
-				+ "    WHERE  "
-				+ "      MD2.M166_MAT = md.M166_MAT  "
-				+ "      AND m166_dt_usc IS NULL  "
-				+ "      AND md2.m166_dt_canc IS NULL "
-				+ "  )  "
-				+ "  AND ( "
-				+ "    mm.M00_DT_CANC IS NULL  "
-				+ "    AND ms.M150_DT_CANC IS NULL  "
-				+ "    AND MD.M166_DT_CANC IS NULL  "
-				+ "    AND MS2.M157_DT_CANC IS NULL  "
-				+ "    AND MR.M160_DT_CANC IS NULL  "
-				+ "    AND mi.m155_st_dir <> 'C' "
-				+ "  ) ";
+		String query = "SELECT "
+				+ "   DISTINCT ms.M150_NOME, "
+				+ "   MS.M150_COGN, "
+				+ "   mm.M00_MAT, "
+				+ "   mi.M155_ID_ISTITUTO, "
+				+ "   m160_descrizione, "
+				+ "   ms2.m157_id_istituto AS IST_APPARTENENZA, "
+				+ "   md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE "
+				+ " FROM "
+				+ "   GATEWAY.MDD00_MATRICOLA mm  "
+				+ "   JOIN GATEWAY.MDD150_SOGGETTO ms ON ms.M150_ID_SOGG = mm.M00_ID_SOGG   "
+				+ "   JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app "
+				+ "   LEFT JOIN GATEWAY.MDD166_DISLOCAZ md ON md.M166_MAT = mm.M00_MAT   "
+				+ "   LEFT JOIN GATEWAY.MDD161_CELLA mc ON md.M166_ID_CELLA = mc.M161_ID_CELLA   "
+				+ "   LEFT JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO   "
+				+ "   LEFT JOIN GATEWAY.MDD155_ISTITUTO mi ON mc.M161_ID_ISTITUTO = mi.M155_ID_ISTITUTO   "
+				+ " WHERE   "
+				+ "   mm.M00_MAT = :matricola AND  "
+				+ "   mm.M00_DT_CARC_CHIUSA IS NULL   "
+				+ "   AND md.M166_PROG_DISL = (  "
+				+ "     SELECT   "
+				+ "       MAX(md2.M166_PROG_DISL)   "
+				+ "     FROM   "
+				+ "       GATEWAY.MDD166_DISLOCAZ md2   "
+				+ "     WHERE   "
+				+ "       MD2.M166_MAT = md.M166_MAT   "
+				+ "       AND m166_dt_usc IS NULL   "
+				+ "       AND md2.m166_dt_canc IS NULL  "
+				+ "   )   "
+				+ "   AND (  "
+				+ "     mm.M00_DT_CANC IS NULL   "
+				+ "     AND ms.M150_DT_CANC IS NULL   "
+				+ "     AND MD.M166_DT_CANC IS NULL   "
+				+ "     AND MS2.M157_DT_CANC IS NULL   "
+				+ "     AND MR.M160_DT_CANC IS NULL   "
+				+ "     AND mi.m155_st_dir <> 'C'  "
+				+ "   )";
 		
 		logger.info("Esecuzione query nativa...");
 		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola).getResultList();
@@ -121,7 +122,35 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		detenuto.setNome((String)row[0]);
 		detenuto.setCognome((String)row[1]);
 		detenuto.setMatricola((String)row[2]);
-		detenuto.setPenitenziario((String)row[3]);
+		
+		logger.info("Controllo presenza dati dislocazione...");
+		if(row[6] != null)
+		{
+			logger.info("Rilevata presenza dislocazione, controllo coerenza informazioni degli istituti...");
+			String istituto = row[3] != null ? (String)row[3] : null;
+			String istitutoAppartenenza = row[5] != null ? (String)row[5] : null;
+			
+			if(StringUtils.isNoneBlank(istituto, istitutoAppartenenza) && istituto.equalsIgnoreCase(istitutoAppartenenza))
+			{
+				logger.info("I dati dell'istituto e di quello di appartenenza risultano coerenti");
+				detenuto.setPenitenziario((String)row[3]);
+			}
+			
+			else
+			{
+				logger.info("I dati dell'istituto ({}) e dell'istituto di appartenenza ({}) "
+						+ "risultano parzialmente o totalmente assenti o non sono tra loro coerenti. "
+						+ "Le informazioni sull'istituto non verranno fornite tra i dati del detenuto",
+						istituto,
+						istitutoAppartenenza);
+			}
+		}
+		
+		else
+			logger.info("Dislocazione non presente, non verranno forniti i dati del "
+					+ "detenuto relativi all'istituto");
+		
+		
 		detenuto.setSezione((String)row[4]);
 		detenuto.setAvailable(numResults != null && numResults > 0);
 		
@@ -177,109 +206,111 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		String query = null;
 		
 		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
-			query = "SELECT  "
-					+ "  MS.M150_NOME,  "
-					+ "  MS.M150_COGN,  "
-					+ "  MI.M155_ID_ISTITUTO,  "
-					+ "  MS2.M157_DEN,  "
-					+ "  mm.M00_MAT,  "
-					+ "  MF.*,  "
-					+ "  ms2.m157_id_istituto AS ist_appartenenza "
-					+ "  FROM  "
-					+ "  GATEWAY.MDD301_FAMILIARE mf  "
-					+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT  "
-					+ "  JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT  "
-					+ "  AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM  "
-					+ "  AND MA.M304_PRG = MAF.M305_PRG_AUTOR  "
-					+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT  "
-					+ "  JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA  "
-					+ "  JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO  "
-					+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app  "
-					+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO  "
-					+ "  WHERE  "
-					+ "  MF.M301_COD_FISCALE = :codiceFiscale  AND  "
-					+ "  MM.M00_DT_CARC_CHIUSA IS NULL  "
-					+ "  AND MA.M304_FUNZ = 'C'  "
-					+ "  AND MA.M304_STATO = 'V'  "
-					+ "  AND MA.M304_TIPO = 'P'  "
-					+ "  AND MD.M166_PROG_DISL = ( "
-					+ "    SELECT  "
-					+ "      MAX (MD2.M166_PROG_DISL)  "
-					+ "    FROM  "
-					+ "      GATEWAY.MDD166_DISLOCAZ md2  "
-					+ "    WHERE  "
-					+ "      MD2.M166_MAT = MM.M00_MAT  "
-					+ "      AND m166_dt_usc IS NULL  "
-					+ "      AND md2.m166_dt_canc IS NULL "
-					+ "  )  "
-					+ "  AND ( "
-					+ "    MF.M301_DT_CANC IS NULL  "
-					+ "    AND MS.M150_DT_CANC IS NULL  "
-					+ "    AND MM.M00_DT_CANC IS NULL  "
-					+ "    AND MD.M166_DT_CANC IS NULL  "
-					+ "    AND MC.M161_DT_CANC IS NULL  "
-					+ "    AND MR.M160_DT_CANC IS NULL  "
-					+ "    AND MA.M304_DT_CANC IS NULL  "
-					+ "    AND maf.M305_DT_CANC IS NULL  "
-					+ "    AND ms2.M157_DT_CANC IS NULL  "
-					+ "    AND mi.m155_st_dir <> 'C' "
-					+ "  )  "
-					+ "ORDER BY  "
-					+ "  mf.M301_DT_INS DESC";
+			query = "SELECT   "
+					+ "   MS.M150_NOME,   "
+					+ "   MS.M150_COGN,   "
+					+ "   MI.M155_ID_ISTITUTO,   "
+					+ "   MS2.M157_DEN,   "
+					+ "   mm.M00_MAT,   "
+					+ "   ms2.m157_id_istituto AS ist_appartenenza, "
+					+ "   md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE, "
+					+ "   MF.*   "
+					+ "   FROM   "
+					+ "   GATEWAY.MDD301_FAMILIARE mf   "
+					+ "   JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG   "
+					+ "   JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG   "
+					+ "   JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT   "
+					+ "   JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT   "
+					+ "   AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM   "
+					+ "   AND MA.M304_PRG = MAF.M305_PRG_AUTOR   "
+					+ "   LEFT JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT   "
+					+ "   LEFT JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA   "
+					+ "   LEFT JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO   "
+					+ "   JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app   "
+					+ "   LEFT JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO   "
+					+ "   WHERE   "
+					+ "   MF.M301_COD_FISCALE = :codiceFiscale  AND   "
+					+ "   MM.M00_DT_CARC_CHIUSA IS NULL   "
+					+ "   AND MA.M304_FUNZ = 'C'   "
+					+ "   AND MA.M304_STATO = 'V'   "
+					+ "   AND MA.M304_TIPO = 'P'   "
+					+ "   AND MD.M166_PROG_DISL = (  "
+					+ "     SELECT   "
+					+ "       MAX (MD2.M166_PROG_DISL)   "
+					+ "     FROM   "
+					+ "       GATEWAY.MDD166_DISLOCAZ md2   "
+					+ "     WHERE   "
+					+ "       MD2.M166_MAT = MM.M00_MAT   "
+					+ "       AND m166_dt_usc IS NULL   "
+					+ "       AND md2.m166_dt_canc IS NULL  "
+					+ "   )   "
+					+ "   AND (  "
+					+ "     MF.M301_DT_CANC IS NULL   "
+					+ "     AND MS.M150_DT_CANC IS NULL   "
+					+ "     AND MM.M00_DT_CANC IS NULL   "
+					+ "     AND MD.M166_DT_CANC IS NULL   "
+					+ "     AND MC.M161_DT_CANC IS NULL   "
+					+ "     AND MR.M160_DT_CANC IS NULL   "
+					+ "     AND MA.M304_DT_CANC IS NULL   "
+					+ "     AND maf.M305_DT_CANC IS NULL   "
+					+ "     AND ms2.M157_DT_CANC IS NULL   "
+					+ "     AND mi.m155_st_dir <> 'C'  "
+					+ "   )   "
+					+ " ORDER BY   "
+					+ "   mf.M301_DT_INS DESC";
 		
 		else
-			query = "SELECT  "
-					+ "  MS.M150_NOME,  "
-					+ "  MS.M150_COGN,  "
-					+ "  MI.M155_ID_ISTITUTO,  "
-					+ "  MS2.M157_DEN,  "
-					+ "  mm.M00_MAT,  "
-					+ "  MF.*, "
-					+ "  ms2.m157_id_istituto AS ist_appartenenza "
-					+ "FROM  "
-					+ "  GATEWAY.MDD301_FAMILIARE mf  "
-					+ "  JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG  "
-					+ "  JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT  "
-					+ "  JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT  "
-					+ "  AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM  "
-					+ "  AND ma.M304_PRG = maf.M305_PRG_AUTOR  "
-					+ "  JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT  "
-					+ "  JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA  "
-					+ "  JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO  "
-					+ "  JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app "
-					+ "  JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO  "
-					+ "WHERE  "
-					+ "  MF.M301_UTENZA = :utenza AND  "
-					+ "  MM.M00_DT_CARC_CHIUSA IS NULL  "
-					+ "  AND MA.M304_FUNZ = 'C'  "
-					+ "  AND MA.M304_STATO = 'V'  "
-					+ "  AND MA.M304_TIPO = 'P'  "
-					+ "  AND MD.M166_PROG_DISL = ( "
-					+ "    SELECT  "
-					+ "      MAX (MD2.M166_PROG_DISL)  "
-					+ "    FROM  "
-					+ "      GATEWAY.MDD166_DISLOCAZ md2  "
-					+ "    WHERE  "
-					+ "      MD2.M166_MAT = MM.M00_MAT AND m166_dt_usc IS NULL "
-					+ "      AND md2.m166_dt_canc IS NULL "
-					+ "  )  "
-					+ "  AND ( "
-					+ "    MF.M301_DT_CANC IS NULL  "
-					+ "    AND MS.M150_DT_CANC IS NULL  "
-					+ "    AND MM.M00_DT_CANC IS NULL  "
-					+ "    AND MD.M166_DT_CANC IS NULL  "
-					+ "    AND MC.M161_DT_CANC IS NULL  "
-					+ "    AND MR.M160_DT_CANC IS NULL  "
-					+ "    AND MA.M304_DT_CANC IS NULL  "
-					+ "    AND maf.M305_DT_CANC IS NULL  "
-					+ "    AND ms2.M157_DT_CANC IS NULL "
-					+ "    AND mi.m155_st_dir <>  'C' "
-					+ "  )  "
-					+ "ORDER BY  "
-					+ "  mf.M301_DT_INS DESC";
+			query = "SELECT   "
+					+ "    MS.M150_NOME,   "
+					+ "    MS.M150_COGN,   "
+					+ "    MI.M155_ID_ISTITUTO,   "
+					+ "    MS2.M157_DEN,   "
+					+ "    mm.M00_MAT,   "
+					+ "    ms2.m157_id_istituto AS ist_appartenenza,"
+					+ "    md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE, "
+					+ "    MF.* "
+					+ "  FROM   "
+					+ "    GATEWAY.MDD301_FAMILIARE mf   "
+					+ "    JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG   "
+					+ "    JOIN GATEWAY.MDD00_MATRICOLA mm ON MM.M00_ID_SOGG = MS.M150_ID_SOGG   "
+					+ "    JOIN GATEWAY.MDD304_AUTORIZZ ma ON ma.M304_MAT = MM.M00_MAT   "
+					+ "    JOIN GATEWAY.MDD305_AUTOR_FAM maf ON MAF.M305_MAT = MM.M00_MAT   "
+					+ "    AND MAF.M305_PRG_FAM = MF.M301_PRG_FAM   "
+					+ "    AND ma.M304_PRG = maf.M305_PRG_AUTOR   "
+					+ "    LEFT JOIN GATEWAY.MDD166_DISLOCAZ md ON MM.M00_MAT = MD.M166_MAT   "
+					+ "    LEFT JOIN GATEWAY.MDD161_CELLA mc ON MC.M161_ID_CELLA = MD.M166_ID_CELLA   "
+					+ "    LEFT JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO   "
+					+ "    JOIN GATEWAY.MDD157_SEZIONE ms2 ON ms2.M157_ID_SEZIONE = mm.m00_c_sez_app  "
+					+ "    LEFT JOIN GATEWAY.MDD155_ISTITUTO mi ON MI.M155_ID_ISTITUTO = MC.M161_ID_ISTITUTO   "
+					+ "  WHERE   "
+					+ "    MF.M301_UTENZA = :utenza AND   "
+					+ "    MM.M00_DT_CARC_CHIUSA IS NULL   "
+					+ "    AND MA.M304_FUNZ = 'C'   "
+					+ "AND MA.M304_STATO = 'V'   "
+					+ "AND MA.M304_TIPO = 'P'   "
+					+ "AND MD.M166_PROG_DISL = (  "
+					+ "  SELECT   "
+					+ "    MAX (MD2.M166_PROG_DISL)   "
+					+ "  FROM   "
+					+ "    GATEWAY.MDD166_DISLOCAZ md2   "
+					+ "  WHERE   "
+					+ "    MD2.M166_MAT = MM.M00_MAT AND m166_dt_usc IS NULL  "
+					+ "    AND md2.m166_dt_canc IS NULL  "
+					+ ")   "
+					+ "AND (  "
+					+ "  MF.M301_DT_CANC IS NULL   "
+					+ "  AND MS.M150_DT_CANC IS NULL   "
+					+ "  AND MM.M00_DT_CANC IS NULL   "
+					+ "  AND MD.M166_DT_CANC IS NULL   "
+					+ "  AND MC.M161_DT_CANC IS NULL   "
+					+ "  AND MR.M160_DT_CANC IS NULL   "
+					+ "  AND MA.M304_DT_CANC IS NULL   "
+					+ "  AND maf.M305_DT_CANC IS NULL   "
+					+ "  AND ms2.M157_DT_CANC IS NULL  "
+					+ "  AND mi.m155_st_dir <>  'C'  "
+					+ "    )   "
+					+ "  ORDER BY   "
+					+ "    mf.M301_DT_INS DESC";
 		
 		/* preparazione output */
 		List<Object[]> listaOutput = null; 
@@ -308,7 +339,34 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				Detenuto detenuto = new Detenuto();
 				detenuto.setNome((String)array[0]);
 				detenuto.setCognome((String)array[1]);
-				detenuto.setPenitenziario((String)array[2]);
+				
+				logger.info("Controllo presenza dati dislocazione...");
+				if(array[6] != null)
+				{
+					logger.info("Dislocazione rilevata, controllo coerenza dati istituti...");
+					String istituto = array[2] != null ? (String)array[2] : null;
+					String istitutoAppartenenza = array[5] != null ? (String)array[2] : null;
+					
+					if(StringUtils.isNoneBlank(istituto, istitutoAppartenenza) && istituto.equalsIgnoreCase(istitutoAppartenenza))
+					{
+						logger.info("I dati dell'istituto e di quello di appartenenza risultano coerenti");
+						detenuto.setPenitenziario((String)array[2]);
+					}
+					
+					else
+					{
+						logger.info("I dati dell'istituto ({}) e dell'istituto di appartenenza ({}) "
+								+ "risultano parzialmente o totalmente assenti o non sono tra loro coerenti. "
+								+ "Le informazioni sull'istituto non verranno fornite tra i dati del detenuto",
+								istituto,
+								istitutoAppartenenza);
+					}
+				}
+				
+				else
+					logger.info("Dislocazione non presente, non verranno forniti i dati del "
+							+ "detenuto relativi all'istituto");
+				
 				detenuto.setSezione((String)array[3]);
 				detenuto.setMatricola((String)array[4]);
 				

@@ -3,7 +3,6 @@ package it.mgg.siapafismw.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import it.mgg.siapafismw.utils.ConvertionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +25,7 @@ import it.mgg.siapafismw.dto.RicercaDetenutoDTO;
 import it.mgg.siapafismw.dto.SimpleRicercaDTO;
 import it.mgg.siapafismw.exceptions.SiapAfisMWException;
 import it.mgg.siapafismw.service.DetenutoService;
+import it.mgg.siapafismw.utils.ConvertionUtils;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
