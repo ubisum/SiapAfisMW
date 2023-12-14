@@ -201,6 +201,22 @@ public class TrackingDAOImpl implements TrackingDAO
 				
 				InsertOrUpdateColloquioTracking colloquio = mapper.map(insert, InsertOrUpdateColloquioTracking.class);
 				colloquio.setInsertOrUpdateColloquioTrackingId(getSequenceNextVal(operation));
+				colloquio.setMatricola(insert.getMatricola());
+				colloquio.setIdColloquioDataVerse(insert.getIdColloquioDataVerse());
+				colloquio.setData(insert.getData());
+				colloquio.setStato(insert.getStato());
+				colloquio.setTipo(insert.getTipo());
+				colloquio.setModalita(insert.getModalita());
+				colloquio.setOreRichieste(insert.getOreRichieste());
+				colloquio.setOreEffettive(insert.getOreRichieste());
+				colloquio.setOraInizioColloquio(insert.getOraInizioColloquio());
+				colloquio.setOraFineColloquio(insert.getOraFineColloquio());
+				colloquio.setNumeroTelefonoFamiliare1(insert.getNumeroTelefonoFamiliare1());
+				colloquio.setCodiceFiscaleFamiliare1(insert.getCodiceFiscaleFamiliare1());
+				colloquio.setNumeroTelefonoFamiliare2(insert.getNumeroTelefonoFamiliare2());
+				colloquio.setCodiceFiscaleFamiliare2(insert.getCodiceFiscaleFamiliare2());
+				colloquio.setNumeroTelefonoFamiliare3(insert.getNumeroTelefonoFamiliare3());
+				colloquio.setCodiceFiscaleFamiliare3(insert.getCodiceFiscaleFamiliare3());
 				colloquio.setDataInserimento(LocalDateTime.now());
 				
 				this.insertOrUpdateRepository.save(colloquio);
@@ -219,7 +235,7 @@ public class TrackingDAOImpl implements TrackingDAO
 				SalvaFamiliareTracking sfTracking = ConvertionUtils.convertFamiliareDTO2SalvaFamiliareTracking(salvaFamiliare);
 				
 				sfTracking.setSalvaFamiliareTrackingId(getSequenceNextVal(operation));
-				sfTracking.setDataInserimennto(LocalDateTime.now());
+				sfTracking.setDataInserimento(LocalDateTime.now());
 				
 				sfTracking = this.salvaFamiliareRepository.save(sfTracking);
 				

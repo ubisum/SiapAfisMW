@@ -49,7 +49,7 @@ public class SalvaFamiliareTracking
 	private LocalDate dataDocumento;
 	
 	@Column(name = "DATA_INSERIMENTO")
-	private LocalDateTime dataInserimennto;
+	private LocalDateTime dataInserimento;
 	
 	@OneToMany(mappedBy = "salvaFamiliare")
 	private List<SalvaFamiliareAllegatiTracking> listaAllegati;

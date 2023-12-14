@@ -206,48 +206,63 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Nessun detenuto presente con la matricola specificata", HttpStatus.BAD_REQUEST);
 		}
 		
-		/* ricerca massimo progressivo familiare per l'id soggetto trovato */
-		logger.info("Ricerca massimo progressivo familiare...");
-		Integer maxProgressivoFamiliare = this.familiareTMiddleRepository.getMaxPrgFamiliare(idSoggetto.get().getIdSoggetto());
-		logger.info("Prossimo progressivo familiare che verra' utilizzato: {}", maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
+		logger.info("Controllo presenza associazione detenuto-familiare...");
+		Integer idAssociazione = this.familiareTMiddleRepository.
+				                               getProgressivoFamiliareAssociato(idSoggetto.get().getIdSoggetto(), 
+				                               familiare.getTelefono(), familiare.getCodiceFiscale());
+		if(idAssociazione == null)
+		{
+			/* ricerca massimo progressivo familiare per l'id soggetto trovato */
+			logger.info("Ricerca massimo progressivo familiare...");
+			Integer maxProgressivoFamiliare = this.familiareTMiddleRepository.getMaxPrgFamiliare(idSoggetto.get().getIdSoggetto());
+			logger.info("Prossimo progressivo familiare che verra' utilizzato: {}", maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
+			
+			logger.info("Ricerca del prossimo progressivo per l'inserimento del documeto...");
+			Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
+					                       idSoggetto.get().getIdSoggetto(), 
+					                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);	
+			
+			/* inserimento familiare su database TMIDDLE */
+			logger.info("Preparazione dell'oggetto FAMILIARE per il salvataggio...");
+			FamiliareTMiddle familiareTM = new FamiliareTMiddle();
+			familiareTM.setFamiliareId(new FamiliareTMiddleId(idSoggetto.get().getIdSoggetto(), 
+					                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1));
+			familiareTM.setNome(familiare.getNome());
+			familiareTM.setCognome(familiare.getCognome());
+			familiareTM.setCodiceFiscale(familiare.getCodiceFiscale());
+			familiareTM.setRelazioneParentela(optRelazione.get().getIdParentela());
+			familiareTM.setUtenza(familiare.getTelefono());
+			familiareTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+			familiareTM.setDataInserimento(LocalDateTime.now());
+			
+			this.familiareTMiddleRepository.save(familiareTM);
+			
+			logger.info("Effettuata operazione SAVE del familiare");
+			
+			logger.info("Preparazione dell'oggetto per il salvataggio del documento...");
+			DocumentoTMiddle documentoTM = new DocumentoTMiddle();
+			documentoTM.setDocumentoId(new DocumentoTMiddleId(idSoggetto.get().getIdSoggetto(),
+					                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1,
+					                                          progressivoDocumento != null ? progressivoDocumento + 1 : 1, 
+					                                          optTipoDocumento.get().getIdTipoDocumento(), 
+					                                          familiare.getNumeroDocumento(), 
+					                                          dataDocumento));
+			
+			documentoTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
+			documentoTM.setDataIns(LocalDateTime.now());
+			
+			this.documentoTMiddleRepository.save(documentoTM);
+			
+			idAssociazione = maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1;
+			
+			logger.info("Effettuata operazione SAVE del documento");
+		}
 		
-		logger.info("Ricerca del prossimo progressivo per l'inserimento del documeto...");
-		Integer progressivoDocumento = this.documentoTMiddleRepository.getMaxProgressivoDocumento(
-				                       idSoggetto.get().getIdSoggetto(), 
-				                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);	
+		else
+			logger.info("Associazione detenuto-familiare gia' presente, "
+					+ "si procede semplicemente all'inserimento di una nuova autorizzazione...");
 		
-		/* inserimento familiare su database TMIDDLE */
-		logger.info("Preparazione dell'oggetto FAMILIARE per il salvataggio...");
-		FamiliareTMiddle familiareTM = new FamiliareTMiddle();
-		familiareTM.setFamiliareId(new FamiliareTMiddleId(idSoggetto.get().getIdSoggetto(), 
-				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1));
-		familiareTM.setNome(familiare.getNome());
-		familiareTM.setCognome(familiare.getCognome());
-		familiareTM.setCodiceFiscale(familiare.getCodiceFiscale());
-		familiareTM.setRelazioneParentela(optRelazione.get().getIdParentela());
-		familiareTM.setUtenza(familiare.getTelefono());
-		familiareTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
-		familiareTM.setDataInserimento(LocalDateTime.now());
 		
-		this.familiareTMiddleRepository.save(familiareTM);
-		
-		logger.info("Effettuata operazione SAVE del familiare");
-		
-		logger.info("Preparazione dell'oggetto per il salvataggio del documento...");
-		DocumentoTMiddle documentoTM = new DocumentoTMiddle();
-		documentoTM.setDocumentoId(new DocumentoTMiddleId(idSoggetto.get().getIdSoggetto(),
-				                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1,
-				                                          progressivoDocumento != null ? progressivoDocumento + 1 : 1, 
-				                                          optTipoDocumento.get().getIdTipoDocumento(), 
-				                                          familiare.getNumeroDocumento(), 
-				                                          dataDocumento));
-		
-		documentoTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
-		documentoTM.setDataIns(LocalDateTime.now());
-		
-		this.documentoTMiddleRepository.save(documentoTM);
-		
-		logger.info("Effettuata operazione SAVE del documento");
 		
 		logger.info("Inizio inserimento autorizzazione...");
 		logger.info("Ricerca progressivo per tabella MDD304_AUTORIZZ...");
@@ -276,7 +291,8 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		logger.info("Preparazione oggetto per salvataggio autorizzazione familiare...");
 		AutorizzazioneFamiliareTMiddleId familiareId = new AutorizzazioneFamiliareTMiddleId(matricola, 
 				                                       nextProgressivoAutorizzazione, 
-				                      maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
+//				                                       maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1);
+				                                       idAssociazione);
 		
 		AutorizzazioneFamiliareTMiddle autorizazioneFamiliare = new AutorizzazioneFamiliareTMiddle();
 		autorizazioneFamiliare.setAutorizzazioneFamiliareTMiddleId(familiareId);
