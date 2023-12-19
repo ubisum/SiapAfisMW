@@ -102,10 +102,10 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Cognome del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
-		if(StringUtils.isBlank(familiare.getCodiceFiscale()))
+		if(StringUtils.isAllBlank(familiare.getCodiceFiscale(), familiare.getTelefono()))
 		{
-			logger.info("Codice fiscale del familiare non valido");
-			throw new SiapAfisMWException("Codice fiscale del familiare non valido", HttpStatus.BAD_REQUEST);
+			logger.info("E' necessario fornire almeno uno tra codice fiscale e numero di telefono per il familiare da inserire");
+			throw new SiapAfisMWException("E' necessario fornire almeno uno tra codice fiscale e numero di telefono per il familiare da inserire", HttpStatus.BAD_REQUEST);
 		}
 		
 		/* controllo e ricerca del tipo documennto */

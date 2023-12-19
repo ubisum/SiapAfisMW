@@ -206,15 +206,15 @@ public class DetenutoDAOImpl implements DetenutoDAO
 		String query = null;
 		
 		if(StringUtils.isNotBlank(ricerca.getCodiceFiscaleFamiliare()))
-			query = "SELECT   "
+			query = "SELECT  DISTINCT "
 					+ "   MS.M150_NOME,   "
 					+ "   MS.M150_COGN,   "
 					+ "   MI.M155_ID_ISTITUTO,   "
 					+ "   MS2.M157_DEN,   "
 					+ "   mm.M00_MAT,   "
 					+ "   ms2.m157_id_istituto AS ist_appartenenza, "
-					+ "   md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE, "
-					+ "   MF.*   "
+					+ "   md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE "
+//					+ "   MF.*   "
 					+ "   FROM   "
 					+ "   GATEWAY.MDD301_FAMILIARE mf   "
 					+ "   JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG   "
@@ -255,20 +255,20 @@ public class DetenutoDAOImpl implements DetenutoDAO
 					+ "     AND maf.M305_DT_CANC IS NULL   "
 					+ "     AND ms2.M157_DT_CANC IS NULL   "
 					+ "     AND mi.m155_st_dir <> 'C'  "
-					+ "   )   "
-					+ " ORDER BY   "
-					+ "   mf.M301_DT_INS DESC";
+					+ "   )   ";
+//					+ " ORDER BY   "
+//					+ "   mf.M301_DT_INS DESC";
 		
 		else
-			query = "SELECT   "
+			query = "SELECT   DISTINCT"
 					+ "    MS.M150_NOME,   "
 					+ "    MS.M150_COGN,   "
 					+ "    MI.M155_ID_ISTITUTO,   "
 					+ "    MS2.M157_DEN,   "
 					+ "    mm.M00_MAT,   "
 					+ "    ms2.m157_id_istituto AS ist_appartenenza,"
-					+ "    md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE, "
-					+ "    MF.* "
+					+ "    md.M166_PROG_DISL AS PROGRESSIVO_DISLOCAZIONE "
+//					+ "    MF.* "
 					+ "  FROM   "
 					+ "    GATEWAY.MDD301_FAMILIARE mf   "
 					+ "    JOIN GATEWAY.MDD150_SOGGETTO ms ON MF.M301_ID_SOGG = MS.M150_ID_SOGG   "
@@ -308,9 +308,9 @@ public class DetenutoDAOImpl implements DetenutoDAO
 					+ "  AND maf.M305_DT_CANC IS NULL   "
 					+ "  AND ms2.M157_DT_CANC IS NULL  "
 					+ "  AND mi.m155_st_dir <>  'C'  "
-					+ "    )   "
-					+ "  ORDER BY   "
-					+ "    mf.M301_DT_INS DESC";
+					+ "    )   ";
+//					+ "  ORDER BY   "
+//					+ "    mf.M301_DT_INS DESC";
 		
 		/* preparazione output */
 		List<Object[]> listaOutput = null; 
