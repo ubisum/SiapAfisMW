@@ -111,9 +111,9 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ " AND aut.M304_STATO = 'V' "
 				+ " AND aut.M304_TIPO = 'P' "
 				+ " AND aut.M304_DT_CANC IS NULL  "
-				+ " AND aut.M304_MAT = :matricola";
+				+ " AND LOWER(aut.M304_MAT) = :matricola";
 		
-		Integer numResults = (Integer)entityManager.createNativeQuery(ricercaAutorizzazioni).setParameter("matricola", matricola).getSingleResult();
+		Integer numResults = (Integer)entityManager.createNativeQuery(ricercaAutorizzazioni).setParameter("matricola", matricola.toLowerCase()).getSingleResult();
 		
 		logger.info("Preparazione oggetto di output...");
 		Object[] row = listaRisultati.get(0);
