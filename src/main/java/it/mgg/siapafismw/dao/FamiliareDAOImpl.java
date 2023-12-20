@@ -145,11 +145,11 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Numero documento del familiare non valido", HttpStatus.BAD_REQUEST);
 		}
 		
-		if(StringUtils.isBlank(familiare.getTelefono()) /*|| !familiare.getTelefono().matches("^[0-9]+$" ) */)
-		{
-			logger.info("Telefono del familiare non valido");
-			throw new SiapAfisMWException("Telefono del familiare non valido", HttpStatus.BAD_REQUEST);
-		}
+//		if(StringUtils.isBlank(familiare.getTelefono()) /*|| !familiare.getTelefono().matches("^[0-9]+$" ) */)
+//		{
+//			logger.info("Telefono del familiare non valido");
+//			throw new SiapAfisMWException("Telefono del familiare non valido", HttpStatus.BAD_REQUEST);
+//		}
 		
 		if(StringUtils.isBlank(familiare.getDataDocumento()))
 		{

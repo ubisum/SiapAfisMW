@@ -366,7 +366,7 @@ public class ColloquioServiceImpl implements ColloquioService
 								                      messaggioEccezione, 
 								                      insertUpdate.getMatricola(),
 								                      "codiceFiscaleFamiliare" + index,
-								                      "numeroTelefonoFamiliare" + index), HttpStatus.BAD_REQUEST);
+								                      "numeroTelefonoFamiliare" + index), HttpStatus.UNAUTHORIZED);
 					}
 					
 					logger.info("Trovato progressivo familiare {}", progressivo);
