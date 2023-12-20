@@ -69,7 +69,7 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ "   LEFT JOIN GATEWAY.MDD160_REPARTO mr ON MR.M160_ID_REPARTO = MC.M161_ID_REPARTO   "
 				+ "   LEFT JOIN GATEWAY.MDD155_ISTITUTO mi ON mc.M161_ID_ISTITUTO = mi.M155_ID_ISTITUTO   "
 				+ " WHERE   "
-				+ "   mm.M00_MAT = :matricola AND  "
+				+ "   LOWER(mm.M00_MAT) = :matricola AND  "
 				+ "   mm.M00_DT_CARC_CHIUSA IS NULL   "
 				+ "   AND md.M166_PROG_DISL = (  "
 				+ "     SELECT   "
@@ -91,7 +91,7 @@ public class DetenutoDAOImpl implements DetenutoDAO
 				+ "   )";
 		
 		logger.info("Esecuzione query nativa...");
-		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola).getResultList();
+		List<Object[]> listaRisultati = entityManager.createNativeQuery(query).setParameter("matricola", matricola.toLowerCase()).getResultList();
 
 		/* costruzione detenuto */
 		DetenutoDTO detenuto = null;
