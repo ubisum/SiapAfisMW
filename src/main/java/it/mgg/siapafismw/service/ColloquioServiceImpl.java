@@ -390,8 +390,13 @@ public class ColloquioServiceImpl implements ColloquioService
 		
 		catch (Throwable ex) 
 		{
-			logger.info("Si e' verificato un errore durante l'analisi dei dati dei familiari", ex);
-			throw new SiapAfisMWException("Si e' verificato un errore durante l'analisi dei dati dei familiari", 
+			String message = ex instanceof SiapAfisMWException ? ((SiapAfisMWException)ex).getMessage() :
+				"Si e' verificato un errore durante l'analisi dei dati dei familiari";
+			
+			logger.info(message, ex);
+			throw new SiapAfisMWException(message, 
+					                      ex instanceof SiapAfisMWException ? 
+					                      ((SiapAfisMWException)ex).getStatus() : 
 					                      HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
