@@ -199,7 +199,8 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		logger.info("Ricerca ID soggetto...");
-		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
+//		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findById(matricola);
+		Optional<MatricolaTMiddle> idSoggetto = this.matricolaRepository.findByIdDtCancNotNull(matricola);
 		if(idSoggetto.isEmpty())
 		{
 			logger.info("Nessun detenuto presente con la matricola specificata");
