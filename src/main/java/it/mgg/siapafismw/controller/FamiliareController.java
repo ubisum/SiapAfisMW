@@ -68,7 +68,13 @@ public class FamiliareController
 			}
 			
 			esito.setResponseCode("200");
-			esito.setResponseDescription("Familiare aggiunto con successo");
+			
+			if(familiare.getFamiliareTrovato() == null || !familiare.getFamiliareTrovato())
+				esito.setResponseDescription("Familiare aggiunto con successo");
+			
+			else
+				esito.setResponseDescription("Familiare gia' associato, creata solo nuova associazione");
+			
 			status = HttpStatus.OK;
 			
 			logger.info("Preparazione risposta con codice 200...");

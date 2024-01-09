@@ -14,4 +14,20 @@ public interface FamiliareTMiddleRepository extends JpaRepository<FamiliareTMidd
 	@Query("select max(f.familiareId.M301_PRG_FAM) from FamiliareTMiddle f where f.familiareId.M301_ID_SOGG = :idSoggetto and "
 		 + "(f.utenza = :utenza or f.codiceFiscale = :codiceFiscale)")
 	public Integer getProgressivoFamiliareAssociato(Integer idSoggetto, String utenza, String codiceFiscale);
+	
+	@Query("select f from FamiliareTMiddle f "
+			+ "where f.familiareId.M301_ID_SOGG = :idSoggetto and f.codiceFiscale = :codiceFiscale and "
+			+ "f.familiareId.M301_PRG_FAM = "
+			+ "(select max(f.familiareId.M301_PRG_FAM) from FamiliareTMiddle f "
+			+ "where f.familiareId.M301_ID_SOGG = :idSoggetto and "
+			 + "f.codiceFiscale = :codiceFiscale)")
+	public FamiliareTMiddle getFamiliareAssociatoByCodiceFiscale(Integer idSoggetto, String codiceFiscale);
+	
+	@Query("select f from FamiliareTMiddle f "
+			+ "where f.familiareId.M301_ID_SOGG = :idSoggetto and f.utenza = :utenza and "
+			+ "f.familiareId.M301_PRG_FAM = "
+			+ "(select max(f.familiareId.M301_PRG_FAM) from FamiliareTMiddle f "
+			+ "where f.familiareId.M301_ID_SOGG = :idSoggetto and "
+			 + "f.utenza = :utenza)")
+		public FamiliareTMiddle getFamiliareAssociatoByUtenza(Integer idSoggetto, String utenza);
 }

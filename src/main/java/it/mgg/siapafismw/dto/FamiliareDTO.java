@@ -25,6 +25,5 @@ public class FamiliareDTO
 	private List<AllegatoDTO> allegati;
 	
 	@JsonIgnore
-	private Integer id;
-	 
+	private Boolean familiareTrovato;
 }

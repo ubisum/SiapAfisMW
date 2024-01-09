@@ -164,6 +164,7 @@ public class ColloquioServiceImpl implements ColloquioService
 					    insertUpdate.getIdColloquioDataVerse());
 			
 			logger.info("Si procede all'inserimento di un nuovo colloquio...");
+			insertUpdate.setColloquioCreato(Boolean.TRUE);
 			
 			logger.info("Creazione oggetti per la persistenza...");
 			colloquio = new ColloquioTMiddle();

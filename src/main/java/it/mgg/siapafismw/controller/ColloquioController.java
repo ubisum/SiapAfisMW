@@ -59,7 +59,12 @@ public class ColloquioController
 			}
 			
 			esito.setResponseCode(String.valueOf(HttpStatus.OK.value()));
-			esito.setResponseDescription("Colloquio aggiunto o modificato con successo");
+			
+			if(insertUpdate.getColloquioCreato() != null && insertUpdate.getColloquioCreato())
+				esito.setResponseDescription("Colloquio aggiunto con successo");
+			
+			else
+				esito.setResponseDescription("Colloquio modificato con successo");
 			
 			return ResponseEntity.ok().body(esito);
 		}

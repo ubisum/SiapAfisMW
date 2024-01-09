@@ -1,5 +1,7 @@
 package it.mgg.siapafismw.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,4 +41,7 @@ public class ColloquioDTO
 	private String numeroTelefonoFamiliare9;
 	private String codiceFiscaleFamiliare10;
 	private String numeroTelefonoFamiliare10;
+	
+	@JsonIgnore
+	private Boolean colloquioCreato;
 }

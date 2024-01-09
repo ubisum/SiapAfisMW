@@ -206,10 +206,51 @@ public class FamiliareDAOImpl implements FamiliareDAO
 			throw new SiapAfisMWException("Nessun detenuto presente con la matricola specificata", HttpStatus.BAD_REQUEST);
 		}
 		
-		logger.info("Controllo presenza associazione detenuto-familiare...");
-		Integer idAssociazione = this.familiareTMiddleRepository.
-				                               getProgressivoFamiliareAssociato(idSoggetto.get().getIdSoggetto(), 
-				                               familiare.getTelefono(), familiare.getCodiceFiscale());
+		logger.info("Controllo presenza associazione detenuto-familiare.");
+		Integer idAssociazione = null;
+		FamiliareTMiddle familiareAssociato = null;
+//		Integer idAssociazione = this.familiareTMiddleRepository.
+//				                               getProgressivoFamiliareAssociato(idSoggetto.get().getIdSoggetto(), 
+//				                               familiare.getTelefono(), familiare.getCodiceFiscale());
+		if(StringUtils.isNotBlank(familiare.getCodiceFiscale()))
+		{
+			logger.info("Ricerca per codice fiscale...");
+			familiareAssociato = this.familiareTMiddleRepository.
+					         getFamiliareAssociatoByCodiceFiscale(
+					         idSoggetto.get().getIdSoggetto(), 
+					         familiare.getCodiceFiscale());
+			
+		}
+		
+		if(familiareAssociato == null && StringUtils.isNotBlank(familiare.getTelefono()))
+		{
+			logger.info("Ricerca per numero di telefono...");
+			familiareAssociato = this.familiareTMiddleRepository.
+					             getFamiliareAssociatoByUtenza(
+					             idSoggetto.get().getIdSoggetto(), 
+					             familiare.getTelefono());
+		}
+		
+		if(familiareAssociato != null)
+		{
+			logger.info("Il familiare fornito risulta gia' associato al detenuto. "
+					  + "Controllo corrispondenza nome e cognome...");
+			
+			if(!familiare.getNome().equalsIgnoreCase(familiareAssociato.getNome()) || 
+			   !familiare.getCognome().equalsIgnoreCase(familiareAssociato.getCognome()))
+			{
+				logger.info("Il familiare fornito risulta gia' associato al detenuto ma "
+						  + "i dati di nome e/o cognome non corrispondono");
+				
+				throw new SiapAfisMWException("Il familiare fornito risulta gia' associato al detenuto ma i dati "
+						                    + "di nome e/o cognome non corrispondono", 
+						                      HttpStatus.BAD_REQUEST);
+			}
+			
+			idAssociazione = familiareAssociato.getFamiliareId().getM301_PRG_FAM();
+				
+		}
+		
 		if(idAssociazione == null)
 		{
 			/* ricerca massimo progressivo familiare per l'id soggetto trovato */
@@ -259,9 +300,12 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		}
 		
 		else
+		{
 			logger.info("Associazione detenuto-familiare gia' presente, "
 					+ "si procede semplicemente all'inserimento di una nuova autorizzazione...");
-		
+			
+			familiare.setFamiliareTrovato(Boolean.TRUE);
+		}
 		
 		
 		logger.info("Inizio inserimento autorizzazione...");
