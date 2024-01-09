@@ -77,7 +77,7 @@ public class ColloquioServiceImpl implements ColloquioService
 		}
 		
 		Optional<MatricolaTMiddle> optMatricola = this.matricolaTMiddleRepository
-                .findById(insertUpdate.getMatricola());
+                .findByIdDtCancNotNull(insertUpdate.getMatricola());
 
 		if(optMatricola.isEmpty())
 		{

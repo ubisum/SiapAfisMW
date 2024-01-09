@@ -10,11 +10,11 @@ public interface ColloquioTMiddleRepository extends JpaRepository<ColloquioTMidd
                                                                   ColloquioTMiddleId> 
 {
 	@Query("select coll from ColloquioTMiddle coll where coll.colloquioId.M321_MAT = :matricola"
-			+ " and coll.colloquioId.M321_PRG_RICH = :progressivo")
+			+ " and coll.colloquioId.M321_PRG_RICH = :progressivo and coll.dataCancellazione is null")
 	public ColloquioTMiddle findByMatricolaProgressivo(String matricola, Integer progressivo);
 	
 	@Query("select max(coll.colloquioId.M321_PRG_RICH) from ColloquioTMiddle coll "
-			+ "where coll.colloquioId.M321_MAT = :matricola")
+			+ "where coll.colloquioId.M321_MAT = :matricola and coll.dataCancellazione is null")
 	public Integer getMaxProgressivoFromMatricola(String matricola);
 	
 	
