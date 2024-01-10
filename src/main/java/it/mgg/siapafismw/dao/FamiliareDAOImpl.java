@@ -90,17 +90,17 @@ public class FamiliareDAOImpl implements FamiliareDAO
 		logger.info("Accesso al DAO per l'inserimento del familiare...");
 		
 		/* controllo dati del familiare */
-		if(StringUtils.isBlank(familiare.getNome()))
-		{
-			logger.info("Nome del familiare on valido");
-			throw new SiapAfisMWException("Nome del familiare non valido", HttpStatus.BAD_REQUEST);
-		}
-		
-		if(StringUtils.isBlank(familiare.getCognome()))
-		{
-			logger.info("Cognome del familiare non valido");
-			throw new SiapAfisMWException("Cognome del familiare non valido", HttpStatus.BAD_REQUEST);
-		}
+//		if(StringUtils.isBlank(familiare.getNome()))
+//		{
+//			logger.info("Nome del familiare on valido");
+//			throw new SiapAfisMWException("Nome del familiare non valido", HttpStatus.BAD_REQUEST);
+//		}
+//		
+//		if(StringUtils.isBlank(familiare.getCognome()))
+//		{
+//			logger.info("Cognome del familiare non valido");
+//			throw new SiapAfisMWException("Cognome del familiare non valido", HttpStatus.BAD_REQUEST);
+//		}
 		
 		if(StringUtils.isAllBlank(familiare.getCodiceFiscale(), familiare.getTelefono()))
 		{

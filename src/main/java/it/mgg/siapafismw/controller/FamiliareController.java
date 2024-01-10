@@ -73,7 +73,7 @@ public class FamiliareController
 				esito.setResponseDescription("Familiare aggiunto con successo");
 			
 			else
-				esito.setResponseDescription("Familiare gia' associato, creata solo nuova associazione");
+				esito.setResponseDescription("Familiare gia' associato, creata nuova autorizzazione");
 			
 			status = HttpStatus.OK;
 			
