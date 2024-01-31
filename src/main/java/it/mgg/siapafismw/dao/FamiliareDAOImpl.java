@@ -229,9 +229,9 @@ public class FamiliareDAOImpl implements FamiliareDAO
 					                                          maxProgressivoFamiliare != null ? maxProgressivoFamiliare + 1 : 1));
 			familiareTM.setNome(familiare.getNome());
 			familiareTM.setCognome(familiare.getCognome());
-			familiareTM.setCodiceFiscale(familiare.getCodiceFiscale());
+			familiareTM.setCodiceFiscale(StringUtils.isNotBlank(familiare.getCodiceFiscale()) ? familiare.getCodiceFiscale() : null);
 			familiareTM.setRelazioneParentela(optRelazione.get().getIdParentela());
-			familiareTM.setUtenza(familiare.getTelefono());
+			familiareTM.setUtenza(StringUtils.isNotBlank(familiare.getTelefono()) ? familiare.getTelefono() : null);
 			familiareTM.setLoginIns(SiapAfisMWConstants.DEFAULT_OPERATOR);
 			familiareTM.setDataInserimento(LocalDateTime.now());
 			

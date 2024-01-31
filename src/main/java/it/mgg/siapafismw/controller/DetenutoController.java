@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,61 @@ public class DetenutoController
 	
 	@GetMapping("/GetInfoDetenuto")
 	public ResponseEntity<DetenutoDTO> getInfoDetenuto(@RequestBody RicercaDetenutoDTO ricerca)
+	{
+		logger.info("Accesso all'endpoint GetInfoDetenuto");
+		
+		/* invocazione del service per ricerca detenuto */
+		DetenutoDTO detenuto = null;
+		
+		try
+		{
+			if(StringUtils.isNotBlank(this.mockValue) && "true".equalsIgnoreCase(this.mockValue))
+			{
+				logger.info("Invocazione del servizio mock per la ricerca delle informazioni del detenuto...");
+				detenuto = detenutoServiceMock.findDetenutoByMatricola(ricerca.getMatricola());
+			}
+			
+			
+			else
+			{
+				logger.info("Invocazione del servizio per la ricerca delle informazioni del detenuto...");
+				detenuto = detenutoService.findDetenutoByMatricola(ricerca.getMatricola());
+			}
+			
+			// if(detenuto != null)
+			// {
+				logger.info("Detenuto trovato, preparazione risposta con codice {}", HttpStatus.OK.value());
+				return ResponseEntity.ok(detenuto);
+			// }
+			
+			// else
+			// {
+			// 	logger.info("Detenuto non trovato, preparazione risposta con codice {}", HttpStatus.NOT_FOUND.value());
+			// 	return ResponseEntity.notFound().build();
+			// }
+		}
+		
+		catch(SiapAfisMWException ex)
+		{
+			logger.info("Si e' verificata un'eccezione", ex);
+			
+			return ResponseEntity.status(ex.getStatus()).body(null);
+		}
+		
+		catch(Throwable ex)
+		{
+			logger.info("Si e' verificata un'eccezione interna", ex);
+			logger.info("Preparazione risposta con codice 500...");
+			
+			return ResponseEntity.internalServerError().body(null);
+		}
+		
+		
+		
+	}
+	
+	@PostMapping("/GetInfoDetenuto2")
+	public ResponseEntity<DetenutoDTO> getInfoDetenuto2(@RequestBody RicercaDetenutoDTO ricerca)
 	{
 		logger.info("Accesso all'endpoint GetInfoDetenuto");
 		
