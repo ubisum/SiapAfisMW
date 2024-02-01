@@ -24,13 +24,13 @@ public class ConvertionUtils
 	{
 		FamiliareDTO familiareDTO = new FamiliareDTO();
 
-		familiareDTO.setCodiceFiscale(familiare.getCodiceFiscale());
+		familiareDTO.setCodiceFiscale(familiare.getCodiceFiscale() != null ? familiare.getCodiceFiscale() : "");
 		familiareDTO.setCognome(familiare.getCognome());
 		familiareDTO.setDocumento(familiare.getDocumento());
 		familiareDTO.setNome(familiare.getNome());
 		familiareDTO.setNumeroDocumento(familiare.getNumeroDocumento());
 		familiareDTO.setDataDocumento(familiare.getDataDocumento());
-		familiareDTO.setTelefono(familiare.getTelefono());
+		familiareDTO.setTelefono(familiare.getTelefono() != null ? familiare.getTelefono() : "");
 		
 		familiareDTO.setGradoParentela(familiare.getGradoParentela());
 
